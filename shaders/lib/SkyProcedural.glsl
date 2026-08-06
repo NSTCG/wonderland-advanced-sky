@@ -2,7 +2,7 @@
  * Ultra-Stylized Sky Procedural Library (GLSL)
  *
  * Features:
- * - Dynamic Day/Night gradients with 100% seamless horizon blending at 90° / -90°
+ * - 100% mathematically identical sky output at horizon (90° / -90°) for x=0 and x=1
  * - Direction towards celestial body (Sun/Moon)
  * - Light-interacting procedural clouds with rim lighting
  * - Twinkling star field fading in with lunar elevation
@@ -55,22 +55,27 @@ vec3 evaluateAtmosphericSkyFast(vec3 viewDir, vec3 lightDir, vec3 lightColor, fl
     float sunCos = clamp(dot(lDir, vec3(0.0, 1.0, 0.0)), -1.0, 1.0);
     float elev = max(0.0, sunCos);
 
+    float elevBlend = clamp(elev / 0.25, 0.0, 1.0);
+    float nightWeight = isNight < 0.5 ? (0.5 * (1.0 - elevBlend)) : (0.5 + 0.5 * elevBlend);
+
+    vec3 dayZenith  = vec3(0.08, 0.35, 0.85);
+    vec3 dayHorizon = vec3(0.45, 0.75, 0.98);
+    vec3 twilightZenith  = vec3(0.16, 0.06, 0.35);
+    vec3 twilightHorizon = vec3(1.0, 0.32, 0.10);
+    vec3 nightZenith  = vec3(0.02, 0.04, 0.14);
+    vec3 nightHorizon = vec3(0.08, 0.14, 0.35);
+
     vec3 skyZenith;
     vec3 skyHorizon;
 
-    vec3 twilightZenith  = vec3(0.16, 0.06, 0.35);
-    vec3 twilightHorizon = vec3(1.0, 0.32, 0.10);
-
-    if (isNight < 0.5) {
-        // DAY: Smooth transition from twilight horizon to bright noon
-        float t = clamp(elev / 0.3, 0.0, 1.0);
-        skyZenith  = mix(twilightZenith, vec3(0.08, 0.35, 0.85), t);
-        skyHorizon = mix(twilightHorizon, vec3(0.45, 0.75, 0.98), t);
+    if (nightWeight <= 0.5) {
+        float t = nightWeight * 2.0;
+        skyZenith  = mix(dayZenith, twilightZenith, t);
+        skyHorizon = mix(dayHorizon, twilightHorizon, t);
     } else {
-        // NIGHT: Smooth transition from twilight horizon to midnight blue
-        float t = clamp(elev / 0.3, 0.0, 1.0);
-        skyZenith  = mix(twilightZenith, vec3(0.02, 0.04, 0.14), t);
-        skyHorizon = mix(twilightHorizon, vec3(0.08, 0.14, 0.35), t);
+        float t = (nightWeight - 0.5) * 2.0;
+        skyZenith  = mix(twilightZenith, nightZenith, t);
+        skyHorizon = mix(twilightHorizon, nightHorizon, t);
     }
 
     vec3 color = mix(skyHorizon, skyZenith, pow(y, 0.7));
@@ -97,24 +102,30 @@ vec3 evaluateUltraStylizedSky(
     float elev = max(0.0, sunCosZenith);
     float cosTheta = clamp(dot(dir, lDir), -1.0, 1.0);
 
-    // --- 1. Dynamic Vibrant Sky Gradient with Horizon Blending ---
-    vec3 skyZenith;
-    vec3 skyHorizon;
-    vec3 skyGround = vec3(0.05, 0.07, 0.12);
+    // Smooth night weight blending at horizon (elevation -> 0.0) so x=0 and x=1 are 100% IDENTICAL at ±90°
+    float elevBlend = clamp(elev / 0.25, 0.0, 1.0);
+    float nightWeight = isNight < 0.5 ? (0.5 * (1.0 - elevBlend)) : (0.5 + 0.5 * elevBlend);
 
+    // --- 1. Dynamic Vibrant Sky Gradient ---
+    vec3 dayZenith       = vec3(0.04, 0.26, 0.75);
+    vec3 dayHorizon      = vec3(0.60, 0.85, 1.0);
     vec3 twilightZenith  = vec3(0.16, 0.06, 0.35);
     vec3 twilightHorizon = vec3(1.0, 0.28, 0.08);
+    vec3 nightZenith     = vec3(0.015, 0.03, 0.12);
+    vec3 nightHorizon    = vec3(0.06, 0.12, 0.32);
+    vec3 skyGround       = vec3(0.05, 0.07, 0.12);
 
-    if (isNight < 0.5) {
-        // DAY MODE: Transition from twilight at horizon to bright daylight at zenith
-        float t = clamp(elev / 0.35, 0.0, 1.0);
-        skyZenith  = mix(twilightZenith, vec3(0.04, 0.26, 0.75), t);
-        skyHorizon = mix(twilightHorizon, vec3(0.60, 0.85, 1.0), t);
+    vec3 skyZenith;
+    vec3 skyHorizon;
+
+    if (nightWeight <= 0.5) {
+        float t = nightWeight * 2.0;
+        skyZenith  = mix(dayZenith, twilightZenith, t);
+        skyHorizon = mix(dayHorizon, twilightHorizon, t);
     } else {
-        // NIGHT MODE: Transition from twilight at horizon to deep midnight navy at zenith
-        float t = clamp(elev / 0.35, 0.0, 1.0);
-        skyZenith  = mix(twilightZenith, vec3(0.015, 0.03, 0.12), t);
-        skyHorizon = mix(twilightHorizon, vec3(0.06, 0.12, 0.32), t);
+        float t = (nightWeight - 0.5) * 2.0;
+        skyZenith  = mix(twilightZenith, nightZenith, t);
+        skyHorizon = mix(twilightHorizon, nightHorizon, t);
     }
 
     vec3 skyColor = mix(skyHorizon, skyZenith, pow(skyHeight, 0.65));
@@ -123,31 +134,26 @@ vec3 evaluateUltraStylizedSky(
     }
 
     // --- 2. Celestial Body (Sun / Moon Disk) ---
-    vec3 celestialGlow = vec3(0.0);
-    if (isNight < 0.5) {
-        // Sun Disk & Corona
-        float sunAngle = max(0.0, cosTheta);
-        float sunDisk = smoothstep(0.9985, 0.9995, sunAngle);
-        float sunCorona = pow(max(0.0, sunAngle), 64.0) * 0.7 + pow(max(0.0, sunAngle), 8.0) * 0.25;
-        vec3 sunColor = mix(vec3(1.0, 0.5, 0.2), vec3(1.0, 0.98, 0.88), clamp(elev * 3.0, 0.0, 1.0));
-        celestialGlow = (sunDisk * 5.0 + sunCorona * 1.5) * sunColor;
-    } else {
-        // Moon Disk & Lunar Glow
-        float moonAngle = max(0.0, cosTheta);
-        float moonDisk = smoothstep(0.9970, 0.9985, moonAngle);
+    float sunAngle = max(0.0, cosTheta);
+    float sunDisk = smoothstep(0.9985, 0.9995, sunAngle);
+    float sunCorona = pow(max(0.0, sunAngle), 64.0) * 0.7 + pow(max(0.0, sunAngle), 8.0) * 0.25;
+    vec3 sunColor = mix(vec3(1.0, 0.5, 0.2), vec3(1.0, 0.98, 0.88), clamp(elev * 3.0, 0.0, 1.0));
+    vec3 sunGlow = (sunDisk * 5.0 + sunCorona * 1.5) * sunColor;
 
-        vec3 offsetLightDir = length(lDir + vec3(0.015, 0.01, 0.0)) > 0.001 ? normalize(lDir + vec3(0.015, 0.01, 0.0)) : lDir;
-        float crescentMask = smoothstep(0.9968, 0.9982, dot(dir, offsetLightDir));
-        moonDisk = clamp(moonDisk - crescentMask, 0.0, 1.0);
+    float moonAngle = max(0.0, cosTheta);
+    float moonDisk = smoothstep(0.9970, 0.9985, moonAngle);
+    vec3 offsetLightDir = length(lDir + vec3(0.015, 0.01, 0.0)) > 0.001 ? normalize(lDir + vec3(0.015, 0.01, 0.0)) : lDir;
+    float crescentMask = smoothstep(0.9968, 0.9982, dot(dir, offsetLightDir));
+    moonDisk = clamp(moonDisk - crescentMask, 0.0, 1.0);
+    float moonGlowAmount = pow(max(0.0, moonAngle), 32.0) * 0.6 + pow(max(0.0, moonAngle), 6.0) * 0.2;
+    vec3 moonColor = vec3(0.75, 0.88, 1.0);
+    vec3 moonGlow = (moonDisk * 3.5 + moonGlowAmount * 0.8) * moonColor;
 
-        float moonGlow = pow(max(0.0, moonAngle), 32.0) * 0.6 + pow(max(0.0, moonAngle), 6.0) * 0.2;
-        vec3 moonColor = vec3(0.75, 0.88, 1.0);
-        celestialGlow = (moonDisk * 3.5 + moonGlow * 0.8) * moonColor;
-    }
+    vec3 celestialGlow = mix(sunGlow, moonGlow, nightWeight);
 
-    // --- 3. Twinkling Stars (Fades in with Lunar Elevation) ---
+    // --- 3. Twinkling Stars (Fades in with Night Weight) ---
     vec3 starColor = vec3(0.0);
-    float starFade = isNight >= 0.5 ? smoothstep(0.0, 0.25, elev) : (elev < 0.05 ? clamp((0.05 - elev) / 0.05, 0.0, 1.0) : 0.0);
+    float starFade = smoothstep(0.5, 0.75, nightWeight);
     if (starFade > 0.001) {
         float starDenom = max(0.05, dir.y + 0.15);
         vec2 starUV = dir.xz / starDenom * 80.0;
@@ -159,9 +165,9 @@ vec3 evaluateUltraStylizedSky(
         }
     }
 
-    // --- 4. Aurora Borealis Curtains (Night Upper Sky) ---
+    // --- 4. Aurora Borealis Curtains (Fades in with Night Weight) ---
     vec3 auroraColor = vec3(0.0);
-    float auroraFade = isNight >= 0.5 ? smoothstep(0.05, 0.35, elev) : 0.0;
+    float auroraFade = smoothstep(0.6, 0.85, nightWeight);
     if (auroraFade > 0.001 && dir.y > 0.15) {
         float auroraDenom = max(0.05, dir.y + 0.2);
         vec2 auroraUV = dir.xz / auroraDenom * 2.5 + vec2(animTime * 0.15, animTime * 0.08);
@@ -186,17 +192,15 @@ vec3 evaluateUltraStylizedSky(
             float lightScatter = max(0.0, dot(dir, lDir));
             float rimLight = pow(max(0.0, lightScatter), 4.0) * 1.2;
 
-            vec3 cLit;
-            vec3 cShadow;
+            vec3 sunTint = mix(vec3(1.0, 0.45, 0.2), vec3(1.0, 0.98, 0.90), clamp(elev * 2.5, 0.0, 1.0));
+            vec3 cLitDay = mix(vec3(0.95, 0.95, 1.0), sunTint, 0.5) * (1.0 + rimLight);
+            vec3 cShadowDay = mix(vec3(0.2, 0.25, 0.45), vec3(0.5, 0.2, 0.3), clamp(1.0 - elev * 3.0, 0.0, 1.0));
 
-            if (isNight < 0.5) {
-                vec3 sunTint = mix(vec3(1.0, 0.45, 0.2), vec3(1.0, 0.98, 0.90), clamp(elev * 2.5, 0.0, 1.0));
-                cLit = mix(vec3(0.95, 0.95, 1.0), sunTint, 0.5) * (1.0 + rimLight);
-                cShadow = mix(vec3(0.2, 0.25, 0.45), vec3(0.5, 0.2, 0.3), clamp(1.0 - elev * 3.0, 0.0, 1.0));
-            } else {
-                cLit = vec3(0.3, 0.4, 0.6) * (1.0 + rimLight * 0.5);
-                cShadow = vec3(0.05, 0.08, 0.18);
-            }
+            vec3 cLitNight = vec3(0.3, 0.4, 0.6) * (1.0 + rimLight * 0.5);
+            vec3 cShadowNight = vec3(0.05, 0.08, 0.18);
+
+            vec3 cLit = mix(cLitDay, cLitNight, nightWeight);
+            vec3 cShadow = mix(cShadowDay, cShadowNight, nightWeight);
 
             cloudColor = mix(cShadow, cLit, clamp(cNoise * 1.5, 0.0, 1.0));
             cloudAlpha = cDensity * smoothstep(0.02, 0.25, dir.y);

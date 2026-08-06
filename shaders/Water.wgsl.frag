@@ -8,7 +8,7 @@
 
 #define USE_MATERIAL_ID
 #define USE_POSITION_WORLD
-#define USE_NORMAL_WORLD
+#define USE_NORMAL
 
 #include "lib/Compatibility.wgsl"
 
@@ -40,7 +40,7 @@ fn decodeMaterial(matIndex: u32) -> Material {
 @fragment
 fn main(
     @location(0) fragPositionWorld: vec3<f32>,
-    @location(1) fragNormalWorld: vec3<f32>,
+    @location(1) fragNormal: vec3<f32>,
 #ifdef TEXTURED
     @location(2) fragTextureCoords: vec2<f32>,
 #endif
@@ -84,7 +84,7 @@ fn main(
     let waveGrad = vec2<f32>((h1x - h1) + (h2x - h2) * 0.5, (h1y - h1) + (h2y - h2) * 0.5) * 4.0;
     let localNormal = normalize(vec3<f32>(-waveGrad.x, 1.0, -waveGrad.y));
 
-    let worldNorm = normalize(fragNormalWorld);
+    let worldNorm = select(vec3<f32>(0.0, 1.0, 0.0), normalize(fragNormal), length(fragNormal) > 0.001);
     var tangent = normalize(cross(worldNorm, vec3<f32>(0.0, 0.0, 1.0)));
     if (length(tangent) < 0.1) {
         tangent = normalize(cross(worldNorm, vec3<f32>(1.0, 0.0, 0.0)));

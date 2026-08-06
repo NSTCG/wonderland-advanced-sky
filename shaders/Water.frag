@@ -10,7 +10,7 @@
 
 #define USE_MATERIAL_ID
 #define USE_POSITION_WORLD
-#define USE_NORMAL_WORLD
+#define USE_NORMAL
 #include "lib/Uniforms.glsl"
 #include "lib/Inputs.glsl"
 #include "lib/Color.glsl"
@@ -77,7 +77,7 @@ void main() {
     vec2 waveGrad = vec2((h1x - h1) + (h2x - h2) * 0.5, (h1y - h1) + (h2y - h2) * 0.5) * 4.0;
     vec3 localNormal = normalize(vec3(-waveGrad.x, 1.0, -waveGrad.y));
 
-    vec3 worldNorm = length(fragNormalWorld) > 0.001 ? normalize(fragNormalWorld) : vec3(0.0, 1.0, 0.0);
+    vec3 worldNorm = length(fragNormal) > 0.001 ? normalize(fragNormal) : vec3(0.0, 1.0, 0.0);
     vec3 tangent = normalize(cross(worldNorm, vec3(0.0, 0.0, 1.0)));
     if (length(tangent) < 0.1) tangent = normalize(cross(worldNorm, vec3(1.0, 0.0, 0.0)));
     vec3 bitangent = cross(worldNorm, tangent);
