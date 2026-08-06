@@ -1,8 +1,8 @@
-import { Component, Property, Object3D, LightComponent } from '@wonderlandengine/api';
+import { Component, property, LightComponent } from '@wonderlandengine/api';
 import { quat } from 'gl-matrix';
 
 /**
- * DayNightCycleComponent (Strict TypeScript)
+ * DayNightCycleComponent (TypeScript with @property decorators)
  *
  * Manages celestial trajectory and state:
  * - Default 30° Y/Z tilt
@@ -12,15 +12,14 @@ import { quat } from 'gl-matrix';
  */
 export class DayNightCycleComponent extends Component {
     static TypeName = 'day-night-cycle';
-    static Properties = {
-        /** Duration in seconds of a full day/night cycle */
-        dayDuration: Property.float(60.0),
-        /** Y-tilt angle in degrees (default 30°) */
-        tiltAngleDeg: Property.float(30.0),
-    };
 
-    dayDuration!: number;
-    tiltAngleDeg!: number;
+    /** Duration in seconds of a full day/night cycle */
+    @property.float(60.0)
+    dayDuration: number = 60.0;
+
+    /** Y-tilt angle in degrees (default 30°) */
+    @property.float(30.0)
+    tiltAngleDeg: number = 30.0;
 
     time: number = 0;
     loopTime: number = -5.0;

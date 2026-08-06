@@ -1,4 +1,4 @@
-import { Component, Property, Object3D } from '@wonderlandengine/api';
+import { Component, property, Object3D } from '@wonderlandengine/api';
 import { vec3 } from 'gl-matrix';
 import type { CustomAudioManager } from './custom-audio-manager.ts';
 
@@ -6,46 +6,53 @@ const PANNING_MODELS: DistanceModelType[] = ['HRTF', 'equalpower'] as unknown as
 const DISTANCE_MODELS: DistanceModelType[] = ['inverse', 'linear', 'exponential'] as unknown as DistanceModelType[];
 
 /**
- * CustomAudioSource Component (Strict TypeScript)
+ * CustomAudioSource Component (TypeScript with @property decorators)
  *
  * Attaches to any Object3D and continuously streams 3D spatialized audio
  * to the CustomAudioManager using Web Audio API HRTF panner nodes.
  */
 export class CustomAudioSource extends Component {
     static TypeName = 'custom-audio-source';
-    static Properties = {
-        /** Object3D holding the CustomAudioManager component */
-        audioManager: Property.object(),
-        /** Path/URL to MP3 audio file */
-        audioUrl: Property.string(''),
-        /** Auto-play on load / unlock */
-        autoplay: Property.bool(true),
-        /** Loop audio playback */
-        loop: Property.bool(true),
-        /** Source volume (0.0 to 1.0) */
-        volume: Property.float(1.0),
-        /** Reference distance for attenuation (meters) */
-        refDistance: Property.float(1.0),
-        /** Maximum distance for 3D attenuation (meters) */
-        maxDistance: Property.float(50.0),
-        /** Rolloff factor for attenuation curve */
-        rolloffFactor: Property.float(1.0),
-        /** Panning algorithm ('HRTF' or 'equalpower') */
-        panningModel: Property.enum(['HRTF', 'equalpower'], 'HRTF'),
-        /** Distance attenuation model ('inverse', 'linear', 'exponential') */
-        distanceModel: Property.enum(['inverse', 'linear', 'exponential'], 'inverse'),
-    };
 
+    /** Object3D holding the CustomAudioManager component */
+    @property.object()
     audioManager!: Object3D | null;
-    audioUrl!: string;
-    autoplay!: boolean;
-    loop!: boolean;
-    volume!: number;
-    refDistance!: number;
-    maxDistance!: number;
-    rolloffFactor!: number;
-    panningModel!: number;
-    distanceModel!: number;
+
+    /** Path/URL to MP3 audio file */
+    @property.string('')
+    audioUrl: string = '';
+
+    /** Auto-play on load / unlock */
+    @property.bool(true)
+    autoplay: boolean = true;
+
+    /** Loop audio playback */
+    @property.bool(true)
+    loop: boolean = true;
+
+    /** Source volume (0.0 to 1.0) */
+    @property.float(1.0)
+    volume: number = 1.0;
+
+    /** Reference distance for attenuation (meters) */
+    @property.float(1.0)
+    refDistance: number = 1.0;
+
+    /** Maximum distance for 3D attenuation (meters) */
+    @property.float(50.0)
+    maxDistance: number = 50.0;
+
+    /** Rolloff factor for attenuation curve */
+    @property.float(1.0)
+    rolloffFactor: number = 1.0;
+
+    /** Panning algorithm ('HRTF' or 'equalpower') */
+    @property.enum(['HRTF', 'equalpower'], 'HRTF')
+    panningModel: number = 0;
+
+    /** Distance attenuation model ('inverse', 'linear', 'exponential') */
+    @property.enum(['inverse', 'linear', 'exponential'], 'inverse')
+    distanceModel: number = 0;
 
     managerComp: CustomAudioManager | null = null;
     pannerNode: PannerNode | null = null;
@@ -79,10 +86,7 @@ export class CustomAudioSource extends Component {
 
     private _findManager(): void {
         if (this.audioManager) {
-            this.managerComp = this.audioManager.getComponent(CustomAudioManager as unknown as string) as CustomAudioManager | null;
-            if (!this.managerComp) {
-                this.managerComp = this.audioManager.getComponent('custom-audio-manager') as CustomAudioManager | null;
-            }
+            this.managerComp = this.audioManager.getComponent('custom-audio-manager') as CustomAudioManager | null;
         }
 
         if (!this.managerComp && this.engine.scene) {

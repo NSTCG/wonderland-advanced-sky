@@ -53,6 +53,9 @@
                         "zoomSensitivity": 10.0,
                         "minZoom": 1.0
                     }
+                },
+                {
+                    "type": "audio-listener"
                 }
             ]
         },
@@ -68,6 +71,9 @@
                     "input": {
                         "type": "eye left"
                     }
+                },
+                {
+                    "type": "audio-listener"
                 }
             ]
         },
@@ -135,6 +141,17 @@
                         "material": "20"
                     },
                     "active": true
+                },
+                {
+                    "type": "audio-source",
+                    "audio-source": {
+                        "src": "oceansfx.mp3",
+                        "loop": true,
+                        "autoplay": true,
+                        "isStationary": true,
+                        "spatial": "hrtf",
+                        "distanceModel": "linear"
+                    }
                 }
             ],
             "scaling": [
@@ -1104,10 +1121,21 @@
         "135": {
             "fileName": "Water 0341normal.jpg",
             "importerName": ""
+        },
+        "136": {
+            "fileName": "oceansfx.mp3",
+            "importerName": ""
         }
     },
     "morphTargets": {},
-    "audioClips": {},
+    "audioClips": {
+        "1": {
+            "link": {
+                "name": "audio_0",
+                "file": "oceansfx.mp3"
+            }
+        }
+    },
     "shaderChunks": {
         "1": {
             "link": {

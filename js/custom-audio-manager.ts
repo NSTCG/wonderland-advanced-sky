@@ -1,27 +1,27 @@
-import { Component, Property, Object3D } from '@wonderlandengine/api';
+import { Component, property, Object3D } from '@wonderlandengine/api';
 import { vec3 } from 'gl-matrix';
 import type { CustomAudioSource } from './custom-audio-source.ts';
 
 /**
- * CustomAudioManager Component (Strict TypeScript)
+ * CustomAudioManager Component (TypeScript with @property decorators)
  *
  * High-performance, 0-GC Web Audio 3D Spatial Listener & Buffer Manager.
  * Seamlessly tracks Non-VR or WebXR VR camera in 3D space.
  */
 export class CustomAudioManager extends Component {
     static TypeName = 'custom-audio-manager';
-    static Properties = {
-        /** Non-VR Camera Object3D */
-        nonVRCamera: Property.object(),
-        /** WebXR VR Camera Object3D */
-        vrCamera: Property.object(),
-        /** Global Master Volume (0.0 to 1.0) */
-        masterVolume: Property.float(1.0),
-    };
 
+    /** Non-VR Camera Object3D */
+    @property.object()
     nonVRCamera!: Object3D | null;
+
+    /** WebXR VR Camera Object3D */
+    @property.object()
     vrCamera!: Object3D | null;
-    masterVolume!: number;
+
+    /** Global Master Volume (0.0 to 1.0) */
+    @property.float(1.0)
+    masterVolume: number = 1.0;
 
     audioCtx: AudioContext | null = null;
     masterGain: GainNode | null = null;
