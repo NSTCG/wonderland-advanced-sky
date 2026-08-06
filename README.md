@@ -2,17 +2,21 @@
 > **Technical Architecture & Shader Engineering Breakdown**  
 > *Engineered for Wonderland Engine (WebGL 2.0 & WebGPU / WGSL)*
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/wonderland-sky/deploy-status)](https://wonderland-advanced-sky.netlify.app)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/wlesky/deploy-status)](https://wlesky.netlify.app)
 [![Repository](https://img.shields.io/badge/GitHub-NSTCG%2Fwonderland--advanced--sky-blue?logo=github)](https://github.com/NSTCG/wonderland-advanced-sky)
 [![Engine](https://img.shields.io/badge/Wonderland%20Engine-1.0%2B-red)](https://wonderlandengine.com)
 [![Graphics](https://img.shields.io/badge/Graphics-WebGL2%20%7C%20WebGPU-orange)]()
 
 ---
 
-## 🌐 Live Demo & Instant Deployment
+![Sunset Ocean Water & Atmospheric Sky Shader](preview.png)
 
-- 🚀 **Live Netlify Web Application**: [https://wonderland-advanced-sky.netlify.app](https://wonderland-advanced-sky.netlify.app)
-- 📁 **Deployment Build Directory**: `/deploy` (Contains pre-compiled WebAssembly binaries, GLSL/WGSL shaders, and WASM runtimes).
+---
+
+## 🌐 Live Web Demo
+
+- 🚀 **Live Interactive Application**: [https://wlesky.netlify.app/](https://wlesky.netlify.app/)
+- 📦 **Pre-packed Archive**: `deploy.zip` (Auto-extracted & served via Netlify `python3 -m zipfile`).
 
 ---
 
