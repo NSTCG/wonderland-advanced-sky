@@ -1,3 +1,4 @@
+#define USE_LIGHTS
 #define FEATURE_TEXTURED
 #define FEATURE_TONEMAPPING
 

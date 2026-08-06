@@ -1,3 +1,4 @@
+#define USE_LIGHTS
 #define USE_MATERIAL_ID
 #define USE_NDC_COORDINATES
 

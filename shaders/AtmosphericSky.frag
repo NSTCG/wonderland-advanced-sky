@@ -1,5 +1,6 @@
 precision highp float;
 
+#define USE_LIGHTS
 #define USE_MATERIAL_ID
 
 #define FEATURE_TONEMAPPING

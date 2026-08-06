@@ -14,8 +14,8 @@
 #define GLOBAL_ENVIRONMENT_PROBE
 #endif
 
-#include "Lights.glsl"
-#include "SkyProcedural.glsl"
+#include "lib/Lights.glsl"
+#include "lib/SkyProcedural.glsl"
 
 #ifdef PROBE_VOLUME
 
