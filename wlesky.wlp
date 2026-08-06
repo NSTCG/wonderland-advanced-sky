@@ -4,12 +4,6 @@
             "name": "Player",
             "components": [
                 {
-                    "type": "wasd-controls",
-                    "wasd-controls": {
-                        "headObject": "17"
-                    }
-                },
-                {
                     "type": "stats-html"
                 },
                 {
@@ -53,9 +47,6 @@
                         "zoomSensitivity": 10.0,
                         "minZoom": 1.0
                     }
-                },
-                {
-                    "type": "audio-listener"
                 }
             ]
         },
@@ -71,9 +62,6 @@
                     "input": {
                         "type": "eye left"
                     }
-                },
-                {
-                    "type": "audio-listener"
                 }
             ]
         },
@@ -131,47 +119,6 @@
                 0.9999821
             ]
         },
-        "90": {
-            "name": "FloorPlane",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "7",
-                        "material": "20"
-                    },
-                    "active": true
-                },
-                {
-                    "type": "audio-source",
-                    "audio-source": {
-                        "src": "oceansfx.mp3",
-                        "loop": true,
-                        "autoplay": true,
-                        "isStationary": true,
-                        "spatial": "hrtf",
-                        "distanceModel": "linear"
-                    }
-                }
-            ],
-            "scaling": [
-                178.4389648,
-                178.438858,
-                178.438858
-            ],
-            "translation": [
-                0.0,
-                -5.662442390530487e-7,
-                0.0
-            ],
-            "rotation": [
-                -0.7071068,
-                0.0,
-                0.0,
-                0.7071067
-            ],
-            "parent": "121"
-        },
         "121": {
             "name": "Environment"
         },
@@ -202,6 +149,12 @@
                         "material": "99"
                     },
                     "active": false
+                },
+                {
+                    "type": "wasd-controls",
+                    "wasd-controls": {
+                        "headObject": "17"
+                    }
                 }
             ],
             "parent": null,
@@ -210,6 +163,89 @@
                 0.9996808,
                 -2.830409471243911e-7,
                 0.0252579
+            ]
+        },
+        "122": {
+            "name": "audioManager",
+            "components": [
+                {
+                    "type": "custom-audio-manager",
+                    "custom-audio-manager": {
+                        "vrCamera": "19",
+                        "nonVRCamera": "17"
+                    }
+                }
+            ]
+        },
+        "123": {
+            "name": "FloorPlane",
+            "translation": [
+                0.0,
+                0.0,
+                -0.0000013
+            ],
+            "rotation": [
+                -0.7071065,
+                0.0,
+                0.0,
+                0.7071068
+            ],
+            "scaling": [
+                178.4389648,
+                178.4377441,
+                178.4377441
+            ],
+            "parent": "121",
+            "components": [
+                {
+                    "type": "mesh",
+                    "active": true,
+                    "mesh": {
+                        "material": "20",
+                        "mesh": "7"
+                    }
+                },
+                {
+                    "type": "custom-audio-source",
+                    "custom-audio-source": {
+                        "audioManager": "122",
+                        "audioUrl": "oceansfx.mp3"
+                    }
+                }
+            ]
+        },
+        "124": {
+            "name": "Terrain",
+            "components": [
+                {
+                    "type": "lod-terrain",
+                    "lod-terrain": {
+                        "playerCamera": "18"
+                    }
+                },
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "132"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                -0.8762165,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
             ]
         }
     },
@@ -341,7 +377,7 @@
                     1.0,
                     1.0,
                     1.0,
-                    0.5019606
+                    0.5019605
                 ],
                 "flatTexture": null,
                 "distortionFactor": 0.2,
@@ -717,6 +753,20 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 0.0
             }
+        },
+        "132": {
+            "name": "material",
+            "pipeline": "145",
+            "Terrain": {
+                "color": [
+                    0.8627451,
+                    0.6766628,
+                    0.6766628,
+                    1.0
+                ],
+                "causticsIntensity": 1.0,
+                "fogDensity": 0.8999999
+            }
         }
     },
     "shaders": {
@@ -825,6 +875,12 @@
         "79": {
             "link": {
                 "name": "Water.frag",
+                "file": "default"
+            }
+        },
+        "141": {
+            "link": {
+                "name": "Terrain.frag",
                 "file": "default"
             }
         }
@@ -1068,7 +1124,20 @@
                 "TONEMAPPING": true,
                 "NORMAL_MAPPING": true
             },
-            "blending": true
+            "blending": true,
+            "doubleSided": true
+        },
+        "145": {
+            "link": {
+                "name": "Terrain",
+                "file": "default"
+            }
+        },
+        "146": {
+            "link": {
+                "name": "Terrain Textured",
+                "file": "default"
+            }
         }
     },
     "textures": {
