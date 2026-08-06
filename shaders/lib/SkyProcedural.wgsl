@@ -140,17 +140,7 @@ fn evaluateUltraStylizedSky(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColor:
         }
     }
 
-    var auroraColor = vec3<f32>(0.0);
-    let auroraFade = smoothstep(0.6, 0.85, nightWeight);
-    if (auroraFade > 0.001 && dir.y > 0.15) {
-        let auroraDenom = max(0.05, dir.y + 0.2);
-        let auroraUV = dir.xz / auroraDenom * 2.5 + vec2<f32>(animTime * 0.15, animTime * 0.08);
-        let wave1 = sin(auroraUV.x * 4.0 + animTime * 1.2) * 0.5 + 0.5;
-        let wave2 = skyFbm2D(auroraUV * 3.0);
-        let auroraMask = smoothstep(0.3, 0.7, wave1 * wave2) * smoothstep(0.15, 0.6, dir.y);
-        let auroraPalette = mix(vec3<f32>(0.1, 0.95, 0.55), vec3<f32>(0.55, 0.15, 0.95), sin(auroraUV.x * 2.0) * 0.5 + 0.5);
-        auroraColor = auroraPalette * auroraMask * 0.8 * auroraFade;
-    }
+    let auroraColor = vec3<f32>(0.0);
 
     var cloudColor = vec3<f32>(0.0);
     var cloudAlpha: f32 = 0.0;

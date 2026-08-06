@@ -165,19 +165,8 @@ vec3 evaluateUltraStylizedSky(
         }
     }
 
-    // --- 4. Aurora Borealis Curtains (Fades in with Night Weight) ---
+    // --- 4. Aurora Borealis Curtains (Disabled per request) ---
     vec3 auroraColor = vec3(0.0);
-    float auroraFade = smoothstep(0.6, 0.85, nightWeight);
-    if (auroraFade > 0.001 && dir.y > 0.15) {
-        float auroraDenom = max(0.05, dir.y + 0.2);
-        vec2 auroraUV = dir.xz / auroraDenom * 2.5 + vec2(animTime * 0.15, animTime * 0.08);
-        float wave1 = sin(auroraUV.x * 4.0 + animTime * 1.2) * 0.5 + 0.5;
-        float wave2 = skyFbm2D(auroraUV * 3.0);
-        float auroraMask = smoothstep(0.3, 0.7, wave1 * wave2) * smoothstep(0.15, 0.6, dir.y);
-
-        vec3 auroraPalette = mix(vec3(0.1, 0.95, 0.55), vec3(0.55, 0.15, 0.95), sin(auroraUV.x * 2.0) * 0.5 + 0.5);
-        auroraColor = auroraPalette * auroraMask * 0.8 * auroraFade;
-    }
 
     // --- 5. Light-Interacting Procedural Clouds ---
     vec3 cloudColor = vec3(0.0);

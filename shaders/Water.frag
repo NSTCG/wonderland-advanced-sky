@@ -1,3 +1,5 @@
+precision highp float;
+
 /**
  * Ultra-Realistic Procedural Water Shader (GLSL)
  *
