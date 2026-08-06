@@ -8,6 +8,9 @@
                     "wasd-controls": {
                         "headObject": "17"
                     }
+                },
+                {
+                    "type": "stats-html"
                 }
             ],
             "scaling": [
@@ -102,7 +105,7 @@
             ],
             "rotation": [
                 0.6830127,
-                -0.1830127,
+                -0.1830126,
                 0.1830125,
                 0.6830127
             ],
@@ -126,9 +129,9 @@
                 }
             ],
             "scaling": [
-                54.8184013,
-                54.8184051,
-                54.8184051
+                80.0174636,
+                80.0174331,
+                80.0174331
             ],
             "translation": [
                 0.0,
@@ -176,9 +179,9 @@
             "parent": null,
             "rotation": [
                 2.706752297854109e-7,
-                0.9996809,
+                0.9996808,
                 -2.830409471243911e-7,
-                0.0252581
+                0.025258
             ]
         }
     },
@@ -295,7 +298,7 @@
                     1.0
                 ]
             },
-            "pipeline": "143",
+            "pipeline": "144",
             "Physical": {
                 "metallicFactor": 0.0,
                 "albedoColor": [
@@ -310,9 +313,15 @@
                     1.0,
                     1.0,
                     1.0,
-                    0.117647
+                    0.5019607
                 ],
-                "flatTexture": "1"
+                "flatTexture": null,
+                "distortionFactor": 17.3999996,
+                "uvScale": [
+                    5.0,
+                    5.0
+                ],
+                "normalTexture": "1"
             }
         },
         "22": {
@@ -838,7 +847,9 @@
             "importPhysicalAsPhongMaterials": false
         },
         "runtime": {
-            "loadUncompressedImagesAsBitmap": false
+            "loadUncompressedImagesAsBitmap": true,
+            "enableRuntimeGltf": true,
+            "visualizeOverdraw": false
         }
     },
     "animations": {},
@@ -1018,7 +1029,13 @@
             "link": {
                 "name": "Water Textured",
                 "file": "default"
-            }
+            },
+            "features": {
+                "TEXTURED": true,
+                "TONEMAPPING": true,
+                "NORMAL_MAPPING": true
+            },
+            "blending": true
         }
     },
     "textures": {
@@ -1034,7 +1051,13 @@
             "link": {
                 "name": "Water 0341normal.jpg",
                 "file": "Water 0341normal.jpg"
-            }
+            },
+            "compression": "uastc",
+            "maxSize": [
+                128,
+                128
+            ],
+            "stream": true
         }
     },
     "fonts": {

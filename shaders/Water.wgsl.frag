@@ -4,7 +4,13 @@
 
 #define USE_LIGHTS
 #define FEATURE_TEXTURED
+#define FEATURE_NORMAL_MAPPING
 #define FEATURE_TONEMAPPING
+
+#ifdef NORMAL_MAPPING
+#define TEXTURED
+#define USE_TANGENT
+#endif
 
 #ifdef TEXTURED
 #define USE_TEXTURE_COORDS
@@ -31,9 +37,15 @@
 
 struct Material {
     color: vec4<f16>,
+    uvScale: vec2<f32>,
+    radius: f32,
     distortionFactor: f32,
+    scrollSpeed: f32,
 #ifdef TEXTURED
     flatTexture: u32,
+#ifdef NORMAL_MAPPING
+    normalTexture: u32,
+#endif
 #endif
 };
 
@@ -81,9 +93,9 @@ fn main(
 ) -> @location(0) vec4<f32> {
     let mat: Material = decodeMaterial(drawUniforms.materialIndex);
 
-    // Super smooth 20x gradual radial alpha falloff: Center = (0,0,0), Radius = 30.0
+    // Material Radius Property (Center = (0,0,0), smooth gradual fade to transparent)
     let waterCenter = vec3<f32>(0.0, 0.0, 0.0);
-    let waterRadius: f32 = 30.0;
+    let waterRadius: f32 = select(30.0, mat.radius, mat.radius > 0.001);
     let distToCenter = length(fragPositionWorld.xz - waterCenter.xz);
     let normDist = clamp(distToCenter / waterRadius, 0.0, 1.0);
     let alphaFade = pow(cos(normDist * 1.5707963), 1.6);
@@ -108,17 +120,48 @@ fn main(
     lightCol = lightColors[0].rgb * max(0.1, lightColors[0].a);
     #endif
 
+    // Material Scroll Speed (default multiplier ~0.25 for realistic calm scrolling)
+    let speedMult = select(0.25, mat.scrollSpeed * 0.25, mat.scrollSpeed > 0.0001);
+    let speedTime = animTime * speedMult;
+
+    // Material UV Tiling Scale
+    let scaleX = select(1.0, mat.uvScale.x, mat.uvScale.x > 0.001);
+    let scaleY = select(1.0, mat.uvScale.y, mat.uvScale.y > 0.001);
+    let scaleUV = vec2<f32>(scaleX, scaleY);
+
 #ifdef TEXTURED
-    let texUV = fragTextureCoords;
+    let texUV = fragTextureCoords * scaleUV;
 #else
-    let texUV = fragPositionWorld.xz;
+    let texUV = fragPositionWorld.xz * scaleUV;
 #endif
 
     // Material Distortion Factor (1.0 = full wave distortion, 0.0 = pure mirror reflection)
     let distortion = clamp(mat.distortionFactor, 0.0, 1.0);
 
-    let waveData = computeOceanWave(texUV * 1.5, animTime);
-    let waveNormal = normalize(vec3<f32>(-waveData.x, 1.0, -waveData.z));
+    // Organic noise warp for natural fluid wave movement
+    let noiseWarp = vec2<f32>(
+        skyNoise2D(texUV * 0.4 + vec2<f32>(speedTime * 0.08, speedTime * 0.05)),
+        skyNoise2D(texUV * 0.4 - vec2<f32>(speedTime * 0.06, speedTime * 0.09))
+    ) * 0.20;
+
+    var waveData = computeOceanWave(texUV * 1.5 + noiseWarp, speedTime);
+    var waveNormal = normalize(vec3<f32>(-waveData.x, 1.0, -waveData.z));
+
+#ifdef NORMAL_MAPPING
+#ifdef TEXTURED
+    if (mat.normalTexture > 0u) {
+        let nUV1 = texUV + noiseWarp + vec2<f32>(speedTime * 0.06, speedTime * 0.04);
+        let nUV2 = texUV * 1.6 - noiseWarp - vec2<f32>(speedTime * 0.05, speedTime * 0.07);
+
+        let nMap1 = textureAtlas(mat.normalTexture, nUV1).rgb * 2.0 - 1.0;
+        let nMap2 = textureAtlas(mat.normalTexture, nUV2).rgb * 2.0 - 1.0;
+        let nMapCombined = normalize(nMap1 + nMap2);
+
+        waveNormal = normalize(mix(waveNormal, vec3<f32>(nMapCombined.x, nMapCombined.z, nMapCombined.y), 0.65));
+    }
+#endif
+#endif
+
     let localNormal = mix(vec3<f32>(0.0, 1.0, 0.0), waveNormal, distortion);
 
     let worldNorm = select(vec3<f32>(0.0, 1.0, 0.0), normalize(fragNormal), length(fragNormal) > 0.001);
@@ -130,7 +173,7 @@ fn main(
     let bumpNormal = normalize(tangent * localNormal.x + worldNorm * localNormal.y + bitangent * localNormal.z);
 
     let viewDir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(viewPositionWorld - fragPositionWorld), length(viewPositionWorld - fragPositionWorld) > 0.001);
-    let reflectDir = reflect(-viewDir, bumpNormal);
+    let reflectDir = normalize(reflect(-viewDir, bumpNormal));
 
     let NdotV = max(0.0, dot(bumpNormal, viewDir));
     let fresnel = pow(1.0 - NdotV, 4.0) * 0.85 + 0.10;
@@ -158,11 +201,13 @@ fn main(
 
     var waterBaseColor = mix(deepWaterColor, shallowWaterColor, (1.0 - NdotV) * 0.7) + sss * sssColor;
 #ifdef TEXTURED
-    waterBaseColor *= textureAtlas(mat.flatTexture, texUV).rgb;
+    if (mat.flatTexture > 0u) {
+        waterBaseColor *= textureAtlas(mat.flatTexture, texUV).rgb;
+    }
 #endif
     waterBaseColor *= vec3<f32>(mat.color.rgb);
 
-    let skyReflect = evaluateAtmosphericSkyFast(reflectDir, lightDir, lightCol, isNight, animTime);
+    let skyReflect = evaluateUltraStylizedSky(reflectDir, lightDir, lightCol, isNight, speedTime);
 
     let halfVec = normalize(lightDir + viewDir);
     let NdotH = max(0.0, dot(bumpNormal, halfVec));

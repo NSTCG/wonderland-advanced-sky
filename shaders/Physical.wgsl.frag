@@ -257,3 +257,5 @@ fn main(
 
     return linearToSrgb4(vec4<f32>(col, albedo.a));
 }
+    return linearToSrgb4(vec4<f32>(col, albedo.a));
+}

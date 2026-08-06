@@ -22,9 +22,9 @@ const RuntimeOptions = {
     webgl2: true,
     webgpu: false,
     physx: false,
-    loader: false,
+    loader: true,
     xrFramebufferScaleFactor: 1,
-    loadUncompressedImagesAsBitmap: false,
+    loadUncompressedImagesAsBitmap: true,
     xrOfferSession: {
         mode: 'auto',
         features: Constants.WebXRRequiredFeatures,

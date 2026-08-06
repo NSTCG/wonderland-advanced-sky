@@ -5,16 +5,26 @@
  *
  * Features:
  * - Multi-octave Gerstner-style ocean wave & ripple simulation
- * - Material property `distortionFactor` (1.0 = full waves, 0.0 = pure pristine mirror reflection)
+ * - Optional scrolling Normal Map wave distortion (`normalTexture`)
+ * - Material property `radius` (Center = (0,0,0), smooth gradual fade to transparent)
+ * - Material property `scrollSpeed` for natural, calm wave scrolling speed
+ * - `uvScale` parameter for custom wave/texture tiling (works on textured & non-textured)
+ * - `distortionFactor` parameter (1.0 = full waves, 0.0 = pure pristine mirror reflection)
+ * - Organic noise-warped fluid wave movement
  * - Subsurface light scattering through wave crests
- * - Dual-lobe specular reflections & dynamic sky reflections
+ * - Dual-lobe specular reflections & 1:1 true-scale dynamic sky reflections
  * - Dynamic crest foam
- * - Super smooth 20x gradual radial alpha falloff (Center = (0,0,0), Radius = 30.0)
  */
 
 #define USE_LIGHTS
 #define FEATURE_TEXTURED
+#define FEATURE_NORMAL_MAPPING
 #define FEATURE_TONEMAPPING
+
+#ifdef NORMAL_MAPPING
+#define TEXTURED
+#define USE_TANGENT
+#endif
 
 #ifdef TEXTURED
 #define USE_TEXTURE_COORDS
@@ -38,9 +48,15 @@
 
 struct Material {
     lowp vec4 color;
+    mediump vec2 uvScale;
+    mediump float radius;
     mediump float distortionFactor;
+    mediump float scrollSpeed;
 #ifdef TEXTURED
     mediump uint flatTexture;
+#ifdef NORMAL_MAPPING
+    mediump uint normalTexture;
+#endif
 #endif
 };
 
@@ -101,9 +117,13 @@ void main() {
     lightCol = lightColors[0].rgb * max(0.1, lightColors[0].a);
     #endif
 
-    // Super smooth, 20x gradual radial alpha falloff: Center = (0,0,0), Radius = 30.0
+    // Material Scroll Speed (default multiplier ~0.25 for realistic calm scrolling)
+    float speedMult = (mat.scrollSpeed <= 0.0001) ? 0.25 : (mat.scrollSpeed * 0.25);
+    float speedTime = animTime * speedMult;
+
+    // Material Radius Property (Center = (0,0,0), smooth gradual fade to transparent)
     vec3 waterCenter = vec3(0.0, 0.0, 0.0);
-    float waterRadius = 30.0;
+    float waterRadius = (mat.radius <= 0.001) ? 30.0 : mat.radius;
     float distToCenter = length(fragPositionWorld.xz - waterCenter.xz);
     float normDist = clamp(distToCenter / waterRadius, 0.0, 1.0);
     float alphaFade = pow(cos(normDist * 1.5707963), 1.6);
@@ -111,18 +131,48 @@ void main() {
         discard;
     }
 
+    // Material UV Tiling Scale (works for both textured and non-textured water)
+    vec2 scaleUV = vec2(
+        mat.uvScale.x <= 0.001 ? 1.0 : mat.uvScale.x,
+        mat.uvScale.y <= 0.001 ? 1.0 : mat.uvScale.y
+    );
+
     #ifdef TEXTURED
-    vec2 texUV = fragTextureCoords;
+    vec2 texUV = fragTextureCoords * scaleUV;
     #else
-    vec2 texUV = fragPositionWorld.xz;
+    vec2 texUV = fragPositionWorld.xz * scaleUV;
     #endif
 
     // Material Distortion Factor (1.0 = full wave distortion, 0.0 = pure mirror reflection)
     float distortion = clamp(mat.distortionFactor, 0.0, 1.0);
 
-    // Multi-frequency wave calculation mixed with flat mirror normal based on distortionFactor
-    vec3 waveData = computeOceanWave(texUV * 1.5, animTime);
+    // Organic noise warp for natural fluid wave movement
+    vec2 noiseWarp = vec2(
+        skyNoise2D(texUV * 0.4 + vec2(speedTime * 0.08, speedTime * 0.05)),
+        skyNoise2D(texUV * 0.4 - vec2(speedTime * 0.06, speedTime * 0.09))
+    ) * 0.20;
+
+    // Multi-frequency procedural ocean wave normal with natural speed
+    vec3 waveData = computeOceanWave(texUV * 1.5 + noiseWarp, speedTime);
     vec3 waveNormal = normalize(vec3(-waveData.x, 1.0, -waveData.z));
+
+    // Optional Scrolling Normal Map Wave Blend
+    #ifdef NORMAL_MAPPING
+    #ifdef TEXTURED
+    if (mat.normalTexture > 0u) {
+        vec2 nUV1 = texUV + noiseWarp + vec2(speedTime * 0.06, speedTime * 0.04);
+        vec2 nUV2 = texUV * 1.6 - noiseWarp - vec2(speedTime * 0.05, speedTime * 0.07);
+
+        vec3 nMap1 = textureAtlas(mat.normalTexture, nUV1).rgb * 2.0 - 1.0;
+        vec3 nMap2 = textureAtlas(mat.normalTexture, nUV2).rgb * 2.0 - 1.0;
+        vec3 nMapCombined = normalize(nMap1 + nMap2);
+
+        waveNormal = normalize(mix(waveNormal, vec3(nMapCombined.x, nMapCombined.z, nMapCombined.y), 0.65));
+    }
+    #endif
+    #endif
+
+    // Blend wave normal with flat mirror normal based on distortionFactor
     vec3 localNormal = mix(vec3(0.0, 1.0, 0.0), waveNormal, distortion);
 
     vec3 worldNorm = length(fragNormal) > 0.001 ? normalize(fragNormal) : vec3(0.0, 1.0, 0.0);
@@ -132,9 +182,9 @@ void main() {
     mat3 tbn = mat3(tangent, worldNorm, bitangent);
     vec3 bumpNormal = normalize(tbn * localNormal);
 
-    // View & Reflection Vectors
+    // View & Reflection Vectors (computed in world space for true 1:1 sky scale)
     vec3 viewDir = length(viewPositionWorld - fragPositionWorld) > 0.001 ? normalize(viewPositionWorld - fragPositionWorld) : vec3(0.0, 1.0, 0.0);
-    vec3 reflectDir = reflect(-viewDir, bumpNormal);
+    vec3 reflectDir = normalize(reflect(-viewDir, bumpNormal));
 
     // Optical Calculations
     float NdotV = max(0.0, dot(bumpNormal, viewDir));
@@ -165,12 +215,14 @@ void main() {
 
     vec3 waterBaseColor = mix(deepWaterColor, shallowWaterColor, (1.0 - NdotV) * 0.7) + sss * sssColor;
     #ifdef TEXTURED
-    waterBaseColor *= textureAtlas(mat.flatTexture, texUV).rgb;
+    if (mat.flatTexture > 0u) {
+        waterBaseColor *= textureAtlas(mat.flatTexture, texUV).rgb;
+    }
     #endif
     waterBaseColor *= mat.color.rgb;
 
-    // Dynamic Sky Reflection
-    vec3 skyReflect = evaluateAtmosphericSkyFast(reflectDir, lightDir, lightCol, isNight, animTime);
+    // Dynamic Full Sky Reflection (Sun, Moon, Clouds, Stars, Sky Gradient at 1:1 sky scale)
+    vec3 skyReflect = evaluateUltraStylizedSky(reflectDir, lightDir, lightCol, isNight, speedTime);
 
     // Dual-Lobe Specular Highlights (Sun/Moon glitter)
     vec3 halfVec = normalize(lightDir + viewDir);
