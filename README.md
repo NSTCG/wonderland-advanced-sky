@@ -1,5 +1,5 @@
 # 🌅 Real-Time Atmospheric Sky & Ocean Water Shader System
-> **GDC-Style Technical Architecture & Shader Engineering Breakdown**  
+> **Technical Architecture & Shader Engineering Breakdown**  
 > *Engineered for Wonderland Engine (WebGL 2.0 & WebGPU / WGSL)*
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/wonderland-sky/deploy-status)](https://wonderland-advanced-sky.netlify.app)
@@ -96,21 +96,6 @@ struct Material {
 | `scrollSpeed` | `float` | `1.0` | Global fluid animation velocity multiplier |
 | `flatTexture` | `texture` | `None` | Optional base color texture slot |
 | `normalTexture` | `texture` | `None` | Optional dual-scrolling wave normal map slot |
-
----
-
-## 🚀 Deployment & Netlify Integration Guide
-
-The pre-compiled WebAssembly runtime and static web bundle are located in the `/deploy` folder.
-
-### Netlify Deployment (Auto-Publish from `/deploy`)
-1. **Connect GitHub Repository**:
-   - Go to [Netlify App](https://app.netlify.com) $\rightarrow$ **Add new site** $\rightarrow$ **Import an existing project**.
-   - Select repository: `NSTCG/wonderland-advanced-sky`.
-2. **Configure Build Settings**:
-   - **Build command**: *(Leave blank)*
-   - **Publish directory**: `deploy`
-3. **Netlify auto-deploys** on every commit pushed to `master`.
 
 ---
 

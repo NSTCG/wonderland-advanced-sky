@@ -6,7 +6,9 @@
     "type": "module",
     "module": "js/index.js",
     "scripts": {
-        "build": "echo \"The 'build' script is run by the editor and should produce your application bundle\""
+        "build": "echo \"The 'build' script is run by the editor and should produce your application bundle\"",
+        "postbuild": "node scripts/compress-deploy.js",
+        "zip": "node scripts/compress-deploy.js"
     },
     "keywords": [
         "wonderland-engine"
