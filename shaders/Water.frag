@@ -176,11 +176,11 @@ void main() {
     vec3 finalWater = mix(waterBaseColor, skyReflect, fresnel) + specColor + vec3(foam);
 
     #ifdef TONEMAPPING
-    vec3 linear = srgbToLinear3(finalWater);
+    vec3 linear = srgbToLinear(finalWater);
     linear *= cameraParams.y;
-    finalWater = linearToSrgb3(tonemap(linear));
+    finalWater = linearToSrgb(tonemap(linear));
     #endif
 
     float finalAlpha = mat.color.a * alphaFade;
-    gl_FragColor = vec4(finalWater, finalAlpha);
+    outColor = vec4(finalWater, finalAlpha);
 }
