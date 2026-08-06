@@ -17,8 +17,6 @@
 #ifndef GI_GLSL
 #define GI_GLSL
 
-#include "lib/SkyProcedural.glsl"
-
 #ifdef PROBE_VOLUME
 
 uniform mediump sampler3D probeVolume;

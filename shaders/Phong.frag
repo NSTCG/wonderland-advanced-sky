@@ -69,6 +69,7 @@
 
 #if defined(GLOBAL_ILLUMINATION) || defined(GLOBAL_ILLUMINATION_PROBE_VOLUME)
 #include "lib/CoordinateSystems.glsl"
+#include "lib/SkyProcedural.glsl"
 #include "lib/GI.glsl"
 #endif
 

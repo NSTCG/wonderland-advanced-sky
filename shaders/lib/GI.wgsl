@@ -2,8 +2,6 @@
  * Set of functions dedicated to Global Illumination (WGSL)
  */
 
-#include "lib/SkyProcedural.wgsl"
-
 #ifdef PROBE_VOLUME
 
 struct ProbeVolume {

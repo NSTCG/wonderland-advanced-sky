@@ -76,6 +76,7 @@ diagnostic(off,derivative_uniformity);
 
 #if defined(GLOBAL_ILLUMINATION) || defined(GLOBAL_ILLUMINATION_PROBE_VOLUME)
 #include "lib/CoordinateSystems.wgsl"
+#include "lib/SkyProcedural.wgsl"
 #include "lib/GI.wgsl"
 #endif
 
