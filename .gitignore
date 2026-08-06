@@ -3,7 +3,6 @@ node_modules/
 
 # Wonderland Engine build & cache directories
 cache/
-deploy/
 .autosave/
 .editor/
 
