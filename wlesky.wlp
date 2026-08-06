@@ -11,6 +11,12 @@
                 },
                 {
                     "type": "stats-html"
+                },
+                {
+                    "type": "fixed-foveation",
+                    "fixed-foveation": {
+                        "fixedFoveation": 1.0
+                    }
                 }
             ],
             "scaling": [
@@ -35,7 +41,10 @@
             "parent": "14",
             "components": [
                 {
-                    "type": "view"
+                    "type": "view",
+                    "view": {
+                        "far": 3000.0
+                    }
                 },
                 {
                     "type": "orbital-camera",
@@ -129,9 +138,9 @@
                 }
             ],
             "scaling": [
-                80.0174636,
-                80.0174331,
-                80.0174331
+                178.4389648,
+                178.438858,
+                178.438858
             ],
             "translation": [
                 0.0,
@@ -168,12 +177,14 @@
                 {
                     "mesh": {
                         "material": "112"
-                    }
+                    },
+                    "active": false
                 },
                 {
                     "mesh": {
                         "material": "99"
-                    }
+                    },
+                    "active": false
                 }
             ],
             "parent": null,
@@ -181,7 +192,7 @@
                 2.706752297854109e-7,
                 0.9996808,
                 -2.830409471243911e-7,
-                0.025258
+                0.0252579
             ]
         }
     },
@@ -313,15 +324,17 @@
                     1.0,
                     1.0,
                     1.0,
-                    0.5019607
+                    0.5019606
                 ],
                 "flatTexture": null,
-                "distortionFactor": 17.3999996,
+                "distortionFactor": 0.2,
                 "uvScale": [
-                    5.0,
-                    5.0
+                    10.0,
+                    10.0
                 ],
-                "normalTexture": "1"
+                "normalTexture": "1",
+                "radius": 76.4000015,
+                "scrollSpeed": 1.0
             }
         },
         "22": {
@@ -844,7 +857,10 @@
             }
         },
         "editor": {
-            "importPhysicalAsPhongMaterials": false
+            "importPhysicalAsPhongMaterials": false,
+            "camera": {
+                "far": 5000.0
+            }
         },
         "runtime": {
             "loadUncompressedImagesAsBitmap": true,
@@ -1052,10 +1068,10 @@
                 "name": "Water 0341normal.jpg",
                 "file": "Water 0341normal.jpg"
             },
-            "compression": "uastc",
+            "compression": "none",
             "maxSize": [
-                128,
-                128
+                512,
+                512
             ],
             "stream": true
         }

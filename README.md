@@ -2,7 +2,6 @@
 > **Technical Architecture & Shader Engineering Breakdown**  
 > *Engineered for Wonderland Engine (WebGL 2.0 & WebGPU / WGSL)*
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/wlesky/deploy-status)](https://wlesky.netlify.app)
 [![Repository](https://img.shields.io/badge/GitHub-NSTCG%2Fwonderland--advanced--sky-blue?logo=github)](https://github.com/NSTCG/wonderland-advanced-sky)
 [![Engine](https://img.shields.io/badge/Wonderland%20Engine-1.0%2B-red)](https://wonderlandengine.com)
 [![Graphics](https://img.shields.io/badge/Graphics-WebGL2%20%7C%20WebGPU-orange)]()
@@ -16,7 +15,7 @@
 ## 🌐 Live Web Demo
 
 - 🚀 **Live Interactive Application**: [https://wlesky.netlify.app/](https://wlesky.netlify.app/)
-- 📦 **Pre-packed Archive**: `deploy.zip` (Auto-extracted & served via Netlify `python3 -m zipfile`).
+- 📦 **Pre-packed Application Archive**: `deploy.zip`
 
 ---
 
