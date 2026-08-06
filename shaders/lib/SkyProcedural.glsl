@@ -83,6 +83,78 @@ vec3 evaluateAtmosphericSkyFast(vec3 viewDir, vec3 lightDir, vec3 lightColor, fl
 }
 
 /**
+ * Optimized dynamic sky reflection evaluation for water surface (90 FPS targeted)
+ * Evaluates sky gradients, sun/moon glow, and high-quality 2-octave cloud reflections.
+ */
+vec3 evaluateSkyReflectionFast(
+    vec3 viewDir,
+    vec3 lightDir,
+    vec3 lightColor,
+    float isNight,
+    float animTime
+) {
+    vec3 dir = length(viewDir) > 0.001 ? normalize(viewDir) : vec3(0.0, 1.0, 0.0);
+    vec3 lDir = length(lightDir) > 0.001 ? normalize(lightDir) : vec3(0.0, 1.0, 0.0);
+
+    float viewY = clamp(dir.y, -0.1, 1.0);
+    float skyHeight = clamp(max(0.0001, viewY), 0.0001, 1.0);
+
+    float sunCosZenith = clamp(dot(lDir, vec3(0.0, 1.0, 0.0)), -1.0, 1.0);
+    float elev = max(0.0, sunCosZenith);
+    float cosTheta = clamp(dot(dir, lDir), -1.0, 1.0);
+
+    float elevBlend = clamp(elev / 0.25, 0.0, 1.0);
+    float nightWeight = isNight < 0.5 ? (0.5 * (1.0 - elevBlend)) : (0.5 + 0.5 * elevBlend);
+
+    vec3 dayZenith       = vec3(0.04, 0.26, 0.75);
+    vec3 dayHorizon      = vec3(0.60, 0.85, 1.0);
+    vec3 twilightZenith  = vec3(0.16, 0.06, 0.35);
+    vec3 twilightHorizon = vec3(1.0, 0.28, 0.08);
+    vec3 nightZenith     = vec3(0.015, 0.03, 0.12);
+    vec3 nightHorizon    = vec3(0.06, 0.12, 0.32);
+    vec3 skyGround       = vec3(0.05, 0.07, 0.12);
+
+    vec3 skyZenith  = nightWeight <= 0.5 ? mix(dayZenith, twilightZenith, nightWeight * 2.0) : mix(twilightZenith, nightZenith, (nightWeight - 0.5) * 2.0);
+    vec3 skyHorizon = nightWeight <= 0.5 ? mix(dayHorizon, twilightHorizon, nightWeight * 2.0) : mix(twilightHorizon, nightHorizon, (nightWeight - 0.5) * 2.0);
+
+    vec3 skyColor = mix(skyHorizon, skyZenith, pow(skyHeight, 0.65));
+    if (dir.y < 0.0) {
+        skyColor = mix(skyHorizon, skyGround, clamp(-dir.y * 5.0, 0.0, 1.0));
+    }
+
+    // Celestial Glow
+    float sunAngle = max(0.0, cosTheta);
+    float sunDisk = smoothstep(0.9985, 0.9995, sunAngle);
+    float sunCorona = pow(max(0.0, sunAngle), 16.0) * 0.5;
+    vec3 sunColor = mix(vec3(1.0, 0.5, 0.2), vec3(1.0, 0.98, 0.88), clamp(elev * 3.0, 0.0, 1.0));
+    vec3 celestialGlow = (sunDisk * 4.0 + sunCorona) * sunColor;
+
+    // Ultra-Fast 2-Octave Cloud Reflection
+    if (dir.y > 0.02) {
+        float cloudDenom = max(0.05, dir.y + 0.3);
+        vec2 cloudUV = dir.xz / cloudDenom * 1.8 + vec2(animTime * 0.05, animTime * 0.02);
+        float cNoise = skyNoise2D(cloudUV) * 0.7 + skyNoise2D(cloudUV * 2.2) * 0.3;
+        float cDensity = smoothstep(0.44, 0.72, cNoise);
+
+        if (cDensity > 0.01) {
+            vec3 cLitDay = mix(vec3(0.95, 0.95, 1.0), sunColor, 0.4);
+            vec3 cShadowDay = vec3(0.2, 0.25, 0.45);
+            vec3 cLitNight = vec3(0.3, 0.4, 0.6);
+            vec3 cShadowNight = vec3(0.05, 0.08, 0.18);
+
+            vec3 cLit = mix(cLitDay, cLitNight, nightWeight);
+            vec3 cShadow = mix(cShadowDay, cShadowNight, nightWeight);
+            vec3 cloudColor = mix(cShadow, cLit, clamp(cNoise * 1.4, 0.0, 1.0));
+            float cloudAlpha = cDensity * smoothstep(0.02, 0.25, dir.y);
+
+            skyColor = mix(skyColor, cloudColor, cloudAlpha * 0.85);
+        }
+    }
+
+    return skyColor + celestialGlow;
+}
+
+/**
  * Full Ultra-Stylized Sky Shader evaluation
  */
 vec3 evaluateUltraStylizedSky(

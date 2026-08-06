@@ -207,7 +207,7 @@ fn main(
 #endif
     waterBaseColor *= vec3<f32>(mat.color.rgb);
 
-    let skyReflect = evaluateUltraStylizedSky(reflectDir, lightDir, lightCol, isNight, speedTime);
+    let skyReflect = evaluateSkyReflectionFast(reflectDir, lightDir, lightCol, isNight, speedTime);
 
     let halfVec = normalize(lightDir + viewDir);
     let NdotH = max(0.0, dot(bumpNormal, halfVec));

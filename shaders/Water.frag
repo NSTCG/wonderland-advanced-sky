@@ -221,8 +221,8 @@ void main() {
     #endif
     waterBaseColor *= mat.color.rgb;
 
-    // Dynamic Full Sky Reflection (Sun, Moon, Clouds, Stars, Sky Gradient at 1:1 sky scale)
-    vec3 skyReflect = evaluateUltraStylizedSky(reflectDir, lightDir, lightCol, isNight, speedTime);
+    // Dynamic Full Sky & Cloud Reflection (Optimized for 90 FPS)
+    vec3 skyReflect = evaluateSkyReflectionFast(reflectDir, lightDir, lightCol, isNight, speedTime);
 
     // Dual-Lobe Specular Highlights (Sun/Moon glitter)
     vec3 halfVec = normalize(lightDir + viewDir);

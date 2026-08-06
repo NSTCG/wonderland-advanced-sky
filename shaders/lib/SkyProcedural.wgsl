@@ -70,6 +70,76 @@ fn evaluateAtmosphericSkyFast(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColo
     return color * lightColor;
 }
 
+fn evaluateSkyReflectionFast(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColor: vec3<f32>, isNight: f32, animTime: f32) -> vec3<f32> {
+    let dir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(viewDir), length(viewDir) > 0.001);
+    let lDir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(lightDir), length(lightDir) > 0.001);
+
+    let viewY = clamp(dir.y, -0.1, 1.0);
+    let skyHeight = clamp(max(0.0001, viewY), 0.0001, 1.0);
+
+    let sunCosZenith = clamp(dot(lDir, vec3<f32>(0.0, 1.0, 0.0)), -1.0, 1.0);
+    let elev = max(0.0, sunCosZenith);
+    let cosTheta = clamp(dot(dir, lDir), -1.0, 1.0);
+
+    let elevBlend = clamp(elev / 0.25, 0.0, 1.0);
+    let nightWeight = select(0.5 * (1.0 - elevBlend), 0.5 + 0.5 * elevBlend, isNight >= 0.5);
+
+    let dayZenith       = vec3<f32>(0.04, 0.26, 0.75);
+    let dayHorizon      = vec3<f32>(0.60, 0.85, 1.0);
+    let twilightZenith  = vec3<f32>(0.16, 0.06, 0.35);
+    let twilightHorizon = vec3<f32>(1.0, 0.28, 0.08);
+    let nightZenith     = vec3<f32>(0.015, 0.03, 0.12);
+    let nightHorizon    = vec3<f32>(0.06, 0.12, 0.32);
+    let skyGround       = vec3<f32>(0.05, 0.07, 0.12);
+
+    var skyZenith: vec3<f32>;
+    var skyHorizon: vec3<f32>;
+
+    if (nightWeight <= 0.5) {
+        let t = nightWeight * 2.0;
+        skyZenith  = mix(dayZenith, twilightZenith, t);
+        skyHorizon = mix(dayHorizon, twilightHorizon, t);
+    } else {
+        let t = (nightWeight - 0.5) * 2.0;
+        skyZenith  = mix(twilightZenith, nightZenith, t);
+        skyHorizon = mix(twilightHorizon, nightHorizon, t);
+    }
+
+    var skyColor = mix(skyHorizon, skyZenith, pow(skyHeight, 0.65));
+    if (dir.y < 0.0) {
+        skyColor = mix(skyHorizon, skyGround, clamp(-dir.y * 5.0, 0.0, 1.0));
+    }
+
+    let sunAngle = max(0.0, cosTheta);
+    let sunDisk = smoothstep(0.9985, 0.9995, sunAngle);
+    let sunCorona = pow(max(0.0, sunAngle), 16.0) * 0.5;
+    let sunColor = mix(vec3<f32>(1.0, 0.5, 0.2), vec3<f32>(1.0, 0.98, 0.88), clamp(elev * 3.0, 0.0, 1.0));
+    let celestialGlow = (sunDisk * 4.0 + sunCorona) * sunColor;
+
+    if (dir.y > 0.02) {
+        let cloudDenom = max(0.05, dir.y + 0.3);
+        let cloudUV = dir.xz / cloudDenom * 1.8 + vec2<f32>(animTime * 0.05, animTime * 0.02);
+        let cNoise = skyNoise2D(cloudUV) * 0.7 + skyNoise2D(cloudUV * 2.2) * 0.3;
+        let cDensity = smoothstep(0.44, 0.72, cNoise);
+
+        if (cDensity > 0.01) {
+            let cLitDay = mix(vec3<f32>(0.95, 0.95, 1.0), sunColor, 0.4);
+            let cShadowDay = vec3<f32>(0.2, 0.25, 0.45);
+            let cLitNight = vec3<f32>(0.3, 0.4, 0.6);
+            let cShadowNight = vec3<f32>(0.05, 0.08, 0.18);
+
+            let cLit = mix(cLitDay, cLitNight, nightWeight);
+            let cShadow = mix(cShadowDay, cShadowNight, nightWeight);
+            let cloudColor = mix(cShadow, cLit, clamp(cNoise * 1.4, 0.0, 1.0));
+            let cloudAlpha = cDensity * smoothstep(0.02, 0.25, dir.y);
+
+            skyColor = mix(skyColor, cloudColor, cloudAlpha * 0.85);
+        }
+    }
+
+    return skyColor + celestialGlow;
+}
+
 fn evaluateUltraStylizedSky(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColor: vec3<f32>, isNight: f32, animTime: f32) -> vec3<f32> {
     let dir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(viewDir), length(viewDir) > 0.001);
     let lDir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(lightDir), length(lightDir) > 0.001);
