@@ -53,10 +53,8 @@ export class DayNightCycleComponent extends Component {
         quat.rotateX(q, q, xRad);
         this.object.setRotationLocal(q);
 
-        // Smooth time loop between -5.0 and 5.0 for continuous wave/cloud shader animation
-        const timeSpeed = 1.0;
-        const loopSpan = 10.0;
-        this.loopTime = -5.0 + ((this.time * timeSpeed) % loopSpan);
+        // Smooth, continuously increasing time without modulo snapping for shader animation
+        this.loopTime = this.time;
 
         // Calculate elevation above horizon (0.0 at horizon ±90°, 1.0 at zenith 0°)
         const elevation = Math.cos(xRad);
