@@ -130,25 +130,29 @@
                     "active": true
                 },
                 {
-                    "type": "day-night-cycle"
+                    "type": "day-night-cycle",
+                    "day-night-cycle": {
+                        "dayDuration": 90.0,
+                        "tiltAngleDeg": 0.0
+                    }
                 }
             ],
             "translation": [
-                -0.0000026,
-                0.0,
-                0.0
+                1.0000014,
+                0.3517408,
+                2.2351741790771484e-7
             ],
             "rotation": [
+                0.7071068,
                 0.0,
                 0.0,
-                0.0,
-                1.0
+                0.7071068
             ],
             "parent": "121",
             "scaling": [
-                0.9999982,
-                1.0000023,
-                1.0000022
+                0.9999881,
+                0.9999831,
+                0.9999821
             ]
         },
         "91": {
@@ -286,10 +290,10 @@
                 0.0
             ],
             "rotation": [
-                -0.7072591,
+                -0.7071068,
                 0.0,
                 0.0,
-                0.7069543
+                0.7071068
             ],
             "parent": "121"
         },
@@ -476,7 +480,7 @@
                 }
             ],
             "translation": [
-                0.0,
+                1.0,
                 2.2385535,
                 0.0
             ],
@@ -606,7 +610,7 @@
                     1.0
                 ]
             },
-            "pipeline": "47",
+            "pipeline": "144",
             "Physical": {
                 "metallicFactor": 0.0,
                 "albedoColor": [
@@ -615,6 +619,15 @@
                     1.0,
                     1.0
                 ]
+            },
+            "Water": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "flatTexture": "1"
             }
         },
         "22": {
@@ -1312,8 +1325,22 @@
             }
         }
     },
-    "textures": {},
-    "images": {},
+    "textures": {
+        "1": {
+            "link": {
+                "name": "Water 0341normal.jpg",
+                "file": "Water 0341normal.jpg"
+            }
+        }
+    },
+    "images": {
+        "1": {
+            "link": {
+                "name": "Water 0341normal.jpg",
+                "file": "Water 0341normal.jpg"
+            }
+        }
+    },
     "fonts": {
         "55": {
             "link": {
@@ -1338,6 +1365,10 @@
             "importPhysicalAsPhongMaterials": false,
             "colorSpace": "srgb",
             "importSecondaryUVLegacy": true
+        },
+        "135": {
+            "fileName": "Water 0341normal.jpg",
+            "importerName": ""
         }
     },
     "morphTargets": {},

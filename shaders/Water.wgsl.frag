@@ -57,7 +57,7 @@ fn main(
     animTime = lightPos.y;
     isNight = select(0.0, 1.0, lightPos.x >= 0.5);
     if (length(lightDirectionsWorld[0]) > 0.01) {
-        lightDir = normalize(-lightDirectionsWorld[0]);
+        lightDir = normalize(lightDirectionsWorld[0]);
     } else if (length(lightPos) > 0.01) {
         lightDir = normalize(lightPos);
     }

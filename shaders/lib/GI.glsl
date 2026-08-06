@@ -114,7 +114,7 @@ vec3 evaluateEnvironmentIrradiance(vec3 d) {
     isNight = lightPos.x >= 0.5 ? 1.0 : 0.0;
     animTime = lightPos.y;
     if (length(lightDirectionsWorld[0]) > 0.01) {
-        lightDir = normalize(-lightDirectionsWorld[0]);
+        lightDir = normalize(lightDirectionsWorld[0]);
     } else if (length(lightPos) > 0.01) {
         lightDir = normalize(lightPos);
     }
@@ -160,7 +160,7 @@ vec3 evaluateEnvironment(vec3 normal, vec3 view, vec3 diffuse, float perceptualR
     isNight = lightPos.x >= 0.5 ? 1.0 : 0.0;
     animTime = lightPos.y;
     if (length(lightDirectionsWorld[0]) > 0.01) {
-        lightDir = normalize(-lightDirectionsWorld[0]);
+        lightDir = normalize(lightDirectionsWorld[0]);
     } else if (length(lightPos) > 0.01) {
         lightDir = normalize(lightPos);
     }
@@ -195,7 +195,7 @@ vec3 evaluateEnvironmentClearCoat(vec3 normal, vec3 view, vec3 diffuse, float pe
         isNight = lightPos.x >= 0.5 ? 1.0 : 0.0;
         animTime = lightPos.y;
         if (length(lightDirectionsWorld[0]) > 0.01) {
-            lightDir = normalize(-lightDirectionsWorld[0]);
+            lightDir = normalize(lightDirectionsWorld[0]);
         } else if (length(lightPos) > 0.01) {
             lightDir = normalize(lightPos);
         }

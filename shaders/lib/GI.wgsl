@@ -105,7 +105,7 @@ fn evaluateEnvironmentBaseLayer(normal: vec3<f32>, view: vec3<f32>, diffuse: vec
     isNight = select(0.0, 1.0, lightPos.x >= 0.5);
     animTime = lightPos.y;
     if (length(lightDirectionsWorld[0]) > 0.01) {
-        lightDir = normalize(-lightDirectionsWorld[0]);
+        lightDir = normalize(lightDirectionsWorld[0]);
     } else if (length(lightPos) > 0.01) {
         lightDir = normalize(lightPos);
     }
@@ -146,7 +146,7 @@ fn evaluateEnvironmentClearCoat(normal: vec3<f32>, view: vec3<f32>, diffuse: vec
         isNight = select(0.0, 1.0, lightPos.x >= 0.5);
         animTime = lightPos.y;
         if (length(lightDirectionsWorld[0]) > 0.01) {
-            lightDir = normalize(-lightDirectionsWorld[0]);
+            lightDir = normalize(lightDirectionsWorld[0]);
         } else if (length(lightPos) > 0.01) {
             lightDir = normalize(lightPos);
         }
@@ -174,7 +174,7 @@ fn evaluateEnvironmentIrradiance(d: vec3<f32>) -> vec3<f32> {
     isNight = select(0.0, 1.0, lightPos.x >= 0.5);
     animTime = lightPos.y;
     if (length(lightDirectionsWorld[0]) > 0.01) {
-        lightDir = normalize(-lightDirectionsWorld[0]);
+        lightDir = normalize(lightDirectionsWorld[0]);
     } else if (length(lightPos) > 0.01) {
         lightDir = normalize(lightPos);
     }

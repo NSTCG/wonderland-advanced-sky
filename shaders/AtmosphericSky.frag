@@ -53,7 +53,7 @@ void main() {
     animTime = lightPos.y;
 
     if (length(lightDirectionsWorld[0]) > 0.01) {
-        lightDir = normalize(-lightDirectionsWorld[0]);
+        lightDir = normalize(lightDirectionsWorld[0]);
     } else if (length(lightPos) > 0.01) {
         lightDir = normalize(lightPos);
     }
