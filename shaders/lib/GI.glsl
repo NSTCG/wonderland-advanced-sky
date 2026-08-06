@@ -14,8 +14,11 @@
 #define GLOBAL_ENVIRONMENT_PROBE
 #endif
 
-#include "lib/Lights.glsl"
-#include "lib/SkyProcedural.glsl"
+#ifndef GI_GLSL
+#define GI_GLSL
+
+#include "Lights.glsl"
+#include "SkyProcedural.glsl"
 
 #ifdef PROBE_VOLUME
 
@@ -268,3 +271,5 @@ vec3 evaluateProbeVolume(vec3 position, vec3 normal) {
 vec3 evaluateProbeVolume(vec3 position, vec3 normal, vec3 diffuse) {
     return diffuse*evaluateProbeVolume(position, normal);
 }
+
+#endif // GI_GLSL

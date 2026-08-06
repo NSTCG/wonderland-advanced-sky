@@ -36,8 +36,11 @@ fn skyFbm2D(p_in: vec2<f32>) -> f32 {
 }
 
 fn evaluateAtmosphericSkyFast(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColor: vec3<f32>, isNight: f32, animTime: f32) -> vec3<f32> {
-    let y = clamp(viewDir.y, 0.0, 1.0);
-    let sunCos = dot(lightDir, vec3<f32>(0.0, 1.0, 0.0));
+    let vDir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(viewDir), length(viewDir) > 0.001);
+    let lDir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(lightDir), length(lightDir) > 0.001);
+
+    let y = clamp(vDir.y, 0.0001, 1.0);
+    let sunCos = clamp(dot(lDir, vec3<f32>(0.0, 1.0, 0.0)), -1.0, 1.0);
 
     var skyZenith: vec3<f32>;
     var skyHorizon: vec3<f32>;
@@ -61,12 +64,14 @@ fn evaluateAtmosphericSkyFast(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColo
 }
 
 fn evaluateUltraStylizedSky(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColor: vec3<f32>, isNight: f32, animTime: f32) -> vec3<f32> {
-    let dir = normalize(viewDir);
-    let viewY = clamp(dir.y, -0.1, 1.0);
-    let skyHeight = max(0.0, viewY);
+    let dir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(viewDir), length(viewDir) > 0.001);
+    let lDir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(lightDir), length(lightDir) > 0.001);
 
-    let sunCosZenith = dot(lightDir, vec3<f32>(0.0, 1.0, 0.0));
-    let cosTheta = dot(dir, lightDir);
+    let viewY = clamp(dir.y, -0.1, 1.0);
+    let skyHeight = clamp(max(0.0001, viewY), 0.0001, 1.0);
+
+    let sunCosZenith = clamp(dot(lDir, vec3<f32>(0.0, 1.0, 0.0)), -1.0, 1.0);
+    let cosTheta = clamp(dot(dir, lDir), -1.0, 1.0);
 
     var skyZenith: vec3<f32>;
     var skyHorizon: vec3<f32>;
@@ -97,28 +102,29 @@ fn evaluateUltraStylizedSky(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColor:
     if (isNight < 0.5) {
         let sunAngle = max(0.0, cosTheta);
         let sunDisk = smoothstep(0.9985, 0.9995, sunAngle);
-        let sunCorona = pow(sunAngle, 64.0) * 0.7 + pow(sunAngle, 8.0) * 0.25;
+        let sunCorona = pow(max(0.0, sunAngle), 64.0) * 0.7 + pow(max(0.0, sunAngle), 8.0) * 0.25;
         let sunColor = mix(vec3<f32>(1.0, 0.5, 0.2), vec3<f32>(1.0, 0.98, 0.88), clamp(sunCosZenith * 3.0, 0.0, 1.0));
         celestialGlow = (sunDisk * 5.0 + sunCorona * 1.5) * sunColor;
     } else {
         let moonAngle = max(0.0, cosTheta);
         var moonDisk = smoothstep(0.9970, 0.9985, moonAngle);
-        let offsetLightDir = normalize(lightDir + vec3<f32>(0.015, 0.01, 0.0));
+        let offsetLightDir = select(lDir, normalize(lDir + vec3<f32>(0.015, 0.01, 0.0)), length(lDir + vec3<f32>(0.015, 0.01, 0.0)) > 0.001);
         let crescentMask = smoothstep(0.9968, 0.9982, dot(dir, offsetLightDir));
         moonDisk = clamp(moonDisk - crescentMask, 0.0, 1.0);
 
-        let moonGlow = pow(moonAngle, 32.0) * 0.6 + pow(moonAngle, 6.0) * 0.2;
+        let moonGlow = pow(max(0.0, moonAngle), 32.0) * 0.6 + pow(max(0.0, moonAngle), 6.0) * 0.2;
         let moonColor = vec3<f32>(0.75, 0.88, 1.0);
         celestialGlow = (moonDisk * 3.5 + moonGlow * 0.8) * moonColor;
     }
 
     var starColor = vec3<f32>(0.0);
     if (isNight >= 0.5 || sunCosZenith < 0.1) {
-        let starUV = dir.xz / (dir.y + 0.15) * 80.0;
+        let starDenom = max(0.05, dir.y + 0.15);
+        let starUV = dir.xz / starDenom * 80.0;
         let starPattern = skyHash12(floor(starUV));
         if (starPattern > 0.975) {
             let twinkle = sin(animTime * 4.0 + starPattern * 100.0) * 0.5 + 0.5;
-            let intensity = pow((starPattern - 0.975) / 0.025, 2.0) * twinkle;
+            let intensity = pow(max(0.0, (starPattern - 0.975) / 0.025), 2.0) * twinkle;
             let nightFade = select(clamp((0.1 - sunCosZenith) / 0.1, 0.0, 1.0), 1.0, isNight >= 0.5);
             starColor = vec3<f32>(0.9, 0.95, 1.0) * intensity * nightFade * skyHeight;
         }
@@ -126,7 +132,8 @@ fn evaluateUltraStylizedSky(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColor:
 
     var auroraColor = vec3<f32>(0.0);
     if (isNight >= 0.5 && dir.y > 0.15) {
-        let auroraUV = dir.xz / (dir.y + 0.2) * 2.5 + vec2<f32>(animTime * 0.15, animTime * 0.08);
+        let auroraDenom = max(0.05, dir.y + 0.2);
+        let auroraUV = dir.xz / auroraDenom * 2.5 + vec2<f32>(animTime * 0.15, animTime * 0.08);
         let wave1 = sin(auroraUV.x * 4.0 + animTime * 1.2) * 0.5 + 0.5;
         let wave2 = skyFbm2D(auroraUV * 3.0);
         let auroraMask = smoothstep(0.3, 0.7, wave1 * wave2) * smoothstep(0.15, 0.6, dir.y);
@@ -137,13 +144,14 @@ fn evaluateUltraStylizedSky(viewDir: vec3<f32>, lightDir: vec3<f32>, lightColor:
     var cloudColor = vec3<f32>(0.0);
     var cloudAlpha: f32 = 0.0;
     if (dir.y > 0.02) {
-        let cloudUV = dir.xz / (dir.y + 0.3) * 1.8 + vec2<f32>(animTime * 0.05, animTime * 0.02);
+        let cloudDenom = max(0.05, dir.y + 0.3);
+        let cloudUV = dir.xz / cloudDenom * 1.8 + vec2<f32>(animTime * 0.05, animTime * 0.02);
         let cNoise = skyFbm2D(cloudUV);
         let cDensity = smoothstep(0.42, 0.75, cNoise);
 
         if (cDensity > 0.01) {
-            let lightScatter = max(0.0, dot(dir, lightDir));
-            let rimLight = pow(lightScatter, 4.0) * 1.2;
+            let lightScatter = max(0.0, dot(dir, lDir));
+            let rimLight = pow(max(0.0, lightScatter), 4.0) * 1.2;
 
             var cLit: vec3<f32>;
             var cShadow: vec3<f32>;

@@ -35,15 +35,16 @@ fn main(
 ) -> @location(0) vec4<f32> {
 
     let unprojPoint: vec3<f32> = (inverseProjectionMatrix*vec4(ndcCoordinates, 0.0, 1.0)).xyz;
-    let direction: vec3<f32> = normalize(quat_transformVector(viewToWorld[0], unprojPoint));
+    let direction: vec3<f32> = select(vec3<f32>(0.0, 1.0, 0.0), normalize(quat_transformVector(viewToWorld[0], unprojPoint)), length(unprojPoint) > 0.001);
 
     let mat: Material = decodeMaterial(drawUniforms.materialIndex);
 
     var lightPos = vec3<f32>(0.0, 1.0, 0.5);
-    var lightDir = normalize(vec3<f32>(mat.direction));
+    var lightDir = select(vec3<f32>(0.0, 1.0, 0.5), normalize(vec3<f32>(mat.direction)), length(vec3<f32>(mat.direction)) > 0.001);
     var lightCol = vec3<f32>(1.0);
     var isNight: f32 = 0.0;
     var animTime: f32 = 0.0;
+    let exposureVal: f32 = select(1.0, f32(mat.exposure), f32(mat.exposure) > 0.001);
 
     #if NUM_LIGHTS > 0
     lightPos = lightPositionsWorld[0];
@@ -58,11 +59,12 @@ fn main(
     lightCol = lightColors[0].rgb * max(0.1, lightColors[0].a);
     #endif
 
-    var color: vec3<f32> = evaluateUltraStylizedSky(direction, lightDir, lightCol, isNight, animTime) * f32(mat.exposure);
+    var color: vec3<f32> = evaluateUltraStylizedSky(direction, lightDir, lightCol, isNight, animTime) * exposureVal;
 
     #ifdef TONEMAPPING
     /* Apply exposure */
-    color *= cameraParams.y;
+    let camExp: f32 = select(1.0, cameraParams.y, cameraParams.y > 0.001);
+    color *= camExp;
     color = tonemap(color);
     #endif
 

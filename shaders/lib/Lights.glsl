@@ -1,3 +1,6 @@
+#ifndef LIGHTS_GLSL
+#define LIGHTS_GLSL
+
 /**
  * Calculate fog blend factor, equivalent to GL fixed function fog mode GL_EXP2
  *
@@ -187,3 +190,5 @@ int selectCascade(int shadow, float w) {
 #endif
 
 #endif
+
+#endif // LIGHTS_GLSL
