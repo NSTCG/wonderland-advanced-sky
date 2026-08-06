@@ -1,4 +1,4 @@
-precision highp float;
+#include "lib/Compatibility.glsl"
 
 /**
  * Ultra-Realistic Procedural Water Shader (GLSL)
@@ -26,8 +26,6 @@ precision highp float;
 #include "lib/Uniforms.glsl"
 #include "lib/Inputs.glsl"
 #include "lib/Color.glsl"
-
-out lowp vec4 outColor;
 
 #ifdef TEXTURED
 #include "lib/Textures.glsl"
