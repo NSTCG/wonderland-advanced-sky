@@ -247,6 +247,34 @@
                 1.0,
                 1.0
             ]
+        },
+        "125": {
+            "name": "Mesh",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "133"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                76.9352798,
+                76.9352798,
+                76.9352798
+            ]
         }
     },
     "meshes": {
@@ -380,7 +408,7 @@
                     0.9098039
                 ],
                 "flatTexture": null,
-                "distortionFactor": 0.2,
+                "distortionFactor": 0.1,
                 "uvScale": [
                     10.0,
                     10.0
@@ -768,6 +796,77 @@
                 "fogDensity": 0.0099999,
                 "normalTexture": null
             }
+        },
+        "133": {
+            "name": "Ground Copy",
+            "Phong": {
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.99993744699168e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 1,
+                "emissiveColor": [
+                    0.2,
+                    0.2,
+                    0.2,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.05,
+                    0.05,
+                    0.05,
+                    1.0
+                ],
+                "diffuseColor": [
+                    0.5,
+                    0.5,
+                    0.5,
+                    1.0
+                ]
+            },
+            "pipeline": "147",
+            "Physical": {
+                "metallicFactor": 0.0,
+                "albedoColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "Water": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.9098039
+                ],
+                "flatTexture": null,
+                "distortionFactor": 0.0,
+                "uvScale": [
+                    10.0,
+                    10.0
+                ],
+                "normalTexture": "1",
+                "radius": 76.4000015,
+                "scrollSpeed": 1.0
+            },
+            "SkySphere": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "exposure": 2.0,
+                "direction": [
+                    0.0,
+                    0.5,
+                    1.0
+                ]
+            }
         }
     },
     "shaders": {
@@ -884,6 +983,12 @@
                 "name": "Terrain.frag",
                 "file": "default"
             }
+        },
+        "142": {
+            "link": {
+                "name": "SkySphere.frag",
+                "file": "default"
+            }
         }
     },
     "settings": {
@@ -912,11 +1017,11 @@
                 "tonemapping": "aces approximated"
             },
             "sky": {
-                "enabled": true,
+                "enabled": false,
                 "material": "26"
             },
             "environment": {
-                "enabled": true,
+                "enabled": false,
                 "maxSpecularEnvironmentSize": 512,
                 "intensity": 0.8,
                 "bakeExposure": 1.0,
@@ -1103,6 +1208,18 @@
                 "name": "VertexColor",
                 "file": "default"
             }
+        },
+        "147": {
+            "link": {
+                "name": "SkySphere",
+                "file": "default"
+            },
+            "doubleSided": true,
+            "features": {
+                "TONEMAPPING": true
+            },
+            "depthFunction": "less or equal",
+            "depthTest": true
         },
         "143": {
             "link": {

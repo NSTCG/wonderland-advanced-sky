@@ -1,18 +1,16 @@
 import { Component, property, Object3D, Mesh, MeshAttribute, MeshIndexType } from '@wonderlandengine/api';
-import { vec3 } from 'gl-matrix';
 
 /**
- * LodTerrainComponent (Strict TypeScript)
+ * LodTerrainComponent (Stationary World Space Terrain)
  *
- * Generates an ultra-performant concentric LOD terrain grid:
+ * Generates a concentric LOD terrain grid fixed in world space:
  * - 200m radius underwater ocean basin with seabed, cliffs, and caustics.
  * - Distant mountain terrain sticking out of water level Y=0 beyond 200m radius.
- * - Dynamic 0-GC LOD updates around the player camera.
  */
 export class LodTerrainComponent extends Component {
     static TypeName = 'lod-terrain';
 
-    /** Player Camera Object3D for LOD tracking */
+    /** Player Camera Object3D for reference */
     @property.object()
     playerCamera!: Object3D | null;
 
@@ -33,8 +31,6 @@ export class LodTerrainComponent extends Component {
     oceanDepth: number = -15.0;
 
     private terrainMesh: Mesh | null = null;
-    private tmpPos: Float32Array = new Float32Array(3);
-    private lastCameraPos: Float32Array = new Float32Array([9999, 9999, 9999]);
 
     init(): void {
         this.terrainMesh = null;
@@ -181,21 +177,6 @@ export class LodTerrainComponent extends Component {
 
             const ridgeMask = Math.sin(mDist * Math.PI);
             return Math.max(0.5, mountainFbm * ridgeMask + 5.0);
-        }
-    }
-
-    update(dt: number): void {
-        const activeCam = this.playerCamera || this.object;
-        if (!activeCam) return;
-
-        activeCam.getPositionWorld(this.tmpPos);
-
-        const dx = this.tmpPos[0] - this.lastCameraPos[0];
-        const dz = this.tmpPos[2] - this.lastCameraPos[2];
-        if (dx * dx + dz * dz > 100.0) {
-            this.lastCameraPos[0] = this.tmpPos[0];
-            this.lastCameraPos[2] = this.tmpPos[2];
-            this.object.setPositionWorld([this.tmpPos[0], 0.0, this.tmpPos[2]]);
         }
     }
 }
