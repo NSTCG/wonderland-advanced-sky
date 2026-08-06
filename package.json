@@ -8,7 +8,8 @@
     "scripts": {
         "build": "echo \"The 'build' script is run by the editor and should produce your application bundle\"",
         "postbuild": "node scripts/compress-deploy.js",
-        "zip": "node scripts/compress-deploy.js"
+        "zip": "node scripts/compress-deploy.js",
+        "unzip": "node scripts/unzip-deploy.js"
     },
     "keywords": [
         "wonderland-engine"
