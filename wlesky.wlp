@@ -1,0 +1,1374 @@
+{
+    "objects": {
+        "14": {
+            "name": "Player",
+            "components": [
+                {
+                    "type": "wasd-controls",
+                    "wasd-controls": {
+                        "headObject": "17"
+                    }
+                }
+            ],
+            "scaling": [
+                0.999996,
+                1.0,
+                0.999996
+            ],
+            "translation": [
+                0.0,
+                1.8000596,
+                4.9999995
+            ],
+            "rotation": [
+                -9.912712357618148e-7,
+                -0.0,
+                0.000001,
+                1.0
+            ]
+        },
+        "15": {
+            "name": "WallPlane",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "122"
+                    },
+                    "active": true
+                }
+            ],
+            "scaling": [
+                4.0,
+                2.0,
+                4.0
+            ],
+            "translation": [
+                0.0,
+                2.0,
+                0.0
+            ],
+            "parent": "138"
+        },
+        "133": {
+            "link": {
+                "name": "WonderlandLogo",
+                "file": "models\\WonderlandLogo.glb"
+            },
+            "translation": [
+                -3.8000011,
+                3.4,
+                0.0100001
+            ],
+            "rotation": [
+                0.707095,
+                0.0,
+                0.0,
+                0.7071182
+            ],
+            "scaling": [
+                1.5,
+                1.4999445,
+                1.4999445
+            ],
+            "parent": "138"
+        },
+        "17": {
+            "name": "NonVrCamera",
+            "parent": "14",
+            "components": [
+                {
+                    "type": "view"
+                },
+                {
+                    "type": "mouse-look"
+                }
+            ]
+        },
+        "18": {
+            "name": "EyeLeft",
+            "parent": "14",
+            "components": [
+                {
+                    "type": "view"
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "eye left"
+                    }
+                }
+            ]
+        },
+        "19": {
+            "name": "EyeRight",
+            "parent": "14",
+            "components": [
+                {
+                    "type": "view"
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "eye right"
+                    }
+                }
+            ]
+        },
+        "21": {
+            "name": "Sun",
+            "components": [
+                {
+                    "type": "light",
+                    "light": {
+                        "intensity": 0.7009999,
+                        "shadows": true,
+                        "type": "sun",
+                        "shadowRange": 50.0
+                    },
+                    "active": true
+                }
+            ],
+            "translation": [
+                -4.76837158203125e-7,
+                3.0000109,
+                2.0000066
+            ],
+            "rotation": [
+                0.6035302,
+                0.2049298,
+                -0.0358165,
+                0.7697222
+            ],
+            "parent": "121",
+            "scaling": [
+                0.9999992,
+                0.9999994,
+                0.9999994
+            ]
+        },
+        "91": {
+            "name": "Pillar",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "11",
+                        "material": "25"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                0.615,
+                0.0
+            ],
+            "scaling": [
+                0.432345,
+                0.625,
+                0.432345
+            ],
+            "parent": "135"
+        },
+        "84": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "effect": "outline",
+                        "characterSpacing": 0.1,
+                        "justified": false,
+                        "text": "Default Physical"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                0.002,
+                0.0
+            ],
+            "rotation": [
+                -0.707103,
+                0.0,
+                0.0,
+                0.7071104
+            ],
+            "scaling": [
+                1.0,
+                0.9999709,
+                0.9999709
+            ],
+            "parent": "125"
+        },
+        "102": {
+            "link": {
+                "name": "WL_ShaderBall",
+                "file": "models\\WonderlandShaderBall.glb"
+            },
+            "translation": [
+                0.0,
+                1.25,
+                0.0
+            ],
+            "scaling": [
+                3.0,
+                3.0,
+                3.0
+            ],
+            "components": [
+                {
+                    "mesh": {
+                        "material": "22"
+                    }
+                },
+                {
+                    "mesh": {
+                        "material": "99"
+                    }
+                }
+            ],
+            "parent": "135"
+        },
+        "120": {
+            "link": {
+                "name": "WL_ShaderBall",
+                "file": "models\\WonderlandShaderBall.glb"
+            },
+            "translation": [
+                0.0,
+                1.25,
+                0.0
+            ],
+            "scaling": [
+                3.0,
+                3.0,
+                3.0
+            ],
+            "components": [
+                {
+                    "mesh": {
+                        "material": "111"
+                    }
+                },
+                {
+                    "mesh": {
+                        "material": "99"
+                    }
+                }
+            ],
+            "parent": "137"
+        },
+        "90": {
+            "name": "FloorPlane",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "20"
+                    },
+                    "active": true
+                }
+            ],
+            "scaling": [
+                4.0,
+                4.0,
+                4.0
+            ],
+            "translation": [
+                0.0,
+                -5.662441253662109e-7,
+                0.0
+            ],
+            "rotation": [
+                -0.7072591,
+                0.0,
+                0.0,
+                0.7069543
+            ],
+            "parent": "121"
+        },
+        "95": {
+            "name": "Stands",
+            "parent": "121",
+            "translation": [
+                0.0,
+                0.0,
+                -2.0
+            ]
+        },
+        "121": {
+            "name": "Environment"
+        },
+        "117": {
+            "name": "Stand",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "11",
+                        "material": "25"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                0.615,
+                0.0
+            ],
+            "scaling": [
+                0.432345,
+                0.625,
+                0.432345
+            ],
+            "parent": "136"
+        },
+        "118": {
+            "link": {
+                "name": "WL_ShaderBall",
+                "file": "models\\WonderlandShaderBall.glb"
+            },
+            "translation": [
+                0.0,
+                1.25,
+                0.0
+            ],
+            "scaling": [
+                3.0,
+                3.0,
+                3.0
+            ],
+            "components": [
+                {
+                    "mesh": {
+                        "material": "112"
+                    }
+                },
+                {
+                    "mesh": {
+                        "material": "99"
+                    }
+                }
+            ],
+            "parent": "136"
+        },
+        "119": {
+            "name": "Pillar",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "11",
+                        "material": "25"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                0.615,
+                0.0
+            ],
+            "scaling": [
+                0.432345,
+                0.625,
+                0.432345
+            ],
+            "parent": "137"
+        },
+        "123": {
+            "name": "TextShadow",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "effect": "outline",
+                        "characterSpacing": 0.1,
+                        "justified": false,
+                        "text": "Default Physical",
+                        "material": "124"
+                    },
+                    "active": true
+                }
+            ],
+            "translation": [
+                -0.0050184,
+                3.725290298461914e-8,
+                -0.0035808
+            ],
+            "rotation": [
+                -0.7070986,
+                0.0,
+                0.0,
+                0.7071148
+            ],
+            "scaling": [
+                1.0,
+                0.9999564,
+                0.9999564
+            ],
+            "parent": "125"
+        },
+        "125": {
+            "name": "Text",
+            "translation": [
+                0.0,
+                0.0216946,
+                2.1346309
+            ],
+            "scaling": [
+                7.0,
+                6.9998669,
+                6.9998669
+            ],
+            "parent": "121",
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "135": {
+            "name": "StandLeft",
+            "parent": "95",
+            "translation": [
+                -2.0,
+                0.0,
+                0.0
+            ]
+        },
+        "136": {
+            "name": "StandCenter",
+            "parent": "95"
+        },
+        "137": {
+            "name": "StandRight",
+            "parent": "95",
+            "translation": [
+                2.0,
+                0.0,
+                0.0
+            ]
+        },
+        "138": {
+            "name": "Wall",
+            "parent": "121",
+            "translation": [
+                0.0,
+                0.0,
+                -4.0
+            ]
+        }
+    },
+    "meshes": {
+        "7": {
+            "link": {
+                "name": "PrimitivePlane",
+                "file": "default"
+            }
+        },
+        "8": {
+            "link": {
+                "name": "PrimitiveCube",
+                "file": "default"
+            }
+        },
+        "9": {
+            "link": {
+                "name": "PrimitiveSphere",
+                "file": "default"
+            }
+        },
+        "10": {
+            "link": {
+                "name": "PrimitiveCone",
+                "file": "default"
+            }
+        },
+        "11": {
+            "link": {
+                "name": "PrimitiveCylinder",
+                "file": "default"
+            }
+        },
+        "12": {
+            "link": {
+                "name": "PrimitiveCircle",
+                "file": "default"
+            }
+        },
+        "100": {
+            "link": {
+                "name": "WL_ShaderBall",
+                "file": "models\\WonderlandShaderBall.glb"
+            }
+        },
+        "131": {
+            "link": {
+                "name": "WonderlandLogo",
+                "file": "models\\WonderlandLogo.glb"
+            }
+        },
+        "141": {
+            "link": {
+                "name": "WL_ShaderBall.0",
+                "file": "models\\WonderlandShaderBall.glb"
+            }
+        },
+        "142": {
+            "link": {
+                "name": "WonderlandLogo.0",
+                "file": "models\\WonderlandLogo.glb"
+            }
+        }
+    },
+    "materials": {
+        "DefaultFontMaterial": {
+            "link": {
+                "name": "DefaultFontMaterial",
+                "file": "default"
+            },
+            "Text": {
+                "font": "55",
+                "color": [
+                    0.8823528,
+                    0.8823528,
+                    0.8823528,
+                    1.0
+                ],
+                "effectColor": [
+                    0.1782391,
+                    0.2054992,
+                    0.2392155,
+                    1.0
+                ]
+            }
+        },
+        "20": {
+            "name": "Ground",
+            "Phong": {
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.99993744699168e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 1,
+                "emissiveColor": [
+                    0.2,
+                    0.2,
+                    0.2,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.05,
+                    0.05,
+                    0.05,
+                    1.0
+                ],
+                "diffuseColor": [
+                    0.5,
+                    0.5,
+                    0.5,
+                    1.0
+                ]
+            },
+            "pipeline": "47",
+            "Physical": {
+                "metallicFactor": 0.0,
+                "albedoColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        "22": {
+            "name": "Yellow",
+            "Phong": {
+                "diffuseColor": [
+                    0.9098039,
+                    0.0,
+                    0.5411763,
+                    1.0
+                ],
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.999911299019004e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 10,
+                "ambientColor": [
+                    0.05,
+                    0.05,
+                    0.05,
+                    1.0
+                ],
+                "emissiveColor": [
+                    0.317647,
+                    0.0,
+                    0.2165776,
+                    1.0
+                ]
+            },
+            "pipeline": "47",
+            "Physical": {
+                "albedoColor": [
+                    1.0,
+                    0.8,
+                    0.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 0.4
+            }
+        },
+        "25": {
+            "name": "Stand",
+            "Phong": {
+                "diffuseColor": [
+                    1.0,
+                    0.8039215,
+                    0.0,
+                    1.0
+                ],
+                "specularColor": [
+                    9.999999974752427e-7,
+                    9.999899930335232e-7,
+                    9.999899930335232e-7,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.05,
+                    0.05,
+                    0.05,
+                    1.0
+                ],
+                "emissiveColor": [
+                    0.3843137,
+                    0.3089579,
+                    0.0,
+                    1.0
+                ]
+            },
+            "pipeline": "47",
+            "Physical": {
+                "metallicFactor": 0.4,
+                "roughnessFactor": 0.6,
+                "albedoColor": [
+                    0.5647057,
+                    0.5647057,
+                    0.5647057,
+                    0.9254902
+                ]
+            }
+        },
+        "26": {
+            "name": "Sky",
+            "Phong": {
+                "diffuseColor": [
+                    0.152941,
+                    0.7882353,
+                    0.5411763,
+                    1.0
+                ],
+                "specularColor": [
+                    9.999999974752427e-7,
+                    9.999899930335232e-7,
+                    9.999899930335232e-7,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.05,
+                    0.05,
+                    0.05,
+                    1.0
+                ],
+                "emissiveColor": [
+                    0.0,
+                    0.2352941,
+                    0.1437907,
+                    1.0
+                ]
+            },
+            "pipeline": "140",
+            "Sky": {
+                "colorStop3": [
+                    0.5529412,
+                    1.0,
+                    0.9842212,
+                    1.0
+                ],
+                "colorStop2": [
+                    0.3553709,
+                    0.7993986,
+                    0.8549019,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    0.3,
+                    1.0
+                ],
+                "exposure": 0.4
+            },
+            "AtmosphericSky": {
+                "direction": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "exposure": 1.0
+            }
+        },
+        "98": {
+            "link": {
+                "name": "WL_ShaderBall_Custom",
+                "file": "models\\WonderlandShaderBall.glb"
+            },
+            "pipeline": "47",
+            "name": "WL_ShaderBall_Custom"
+        },
+        "99": {
+            "link": {
+                "name": "WL_ShaderBall_grey",
+                "file": "models\\WonderlandShaderBall.glb"
+            },
+            "pipeline": "47",
+            "Physical": {
+                "roughnessFactor": 0.3,
+                "metallicFactor": 0.3
+            }
+        },
+        "111": {
+            "name": "Green",
+            "Phong": {
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.99993744699168e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 1,
+                "emissiveColor": [
+                    0.2,
+                    0.2,
+                    0.2,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.05,
+                    0.05,
+                    0.05,
+                    1.0
+                ],
+                "diffuseColor": [
+                    0.5,
+                    0.5,
+                    0.5,
+                    1.0
+                ]
+            },
+            "pipeline": "47",
+            "Physical": {
+                "metallicFactor": 0.3,
+                "albedoColor": [
+                    0.4290657,
+                    0.8823528,
+                    0.6850395,
+                    1.0
+                ],
+                "roughnessFactor": 0.6
+            }
+        },
+        "112": {
+            "name": "Pink",
+            "Phong": {
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.99993744699168e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 1,
+                "emissiveColor": [
+                    0.2,
+                    0.2,
+                    0.2,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.05,
+                    0.05,
+                    0.05,
+                    1.0
+                ],
+                "diffuseColor": [
+                    0.5,
+                    0.5,
+                    0.5,
+                    1.0
+                ]
+            },
+            "pipeline": "47",
+            "Physical": {
+                "metallicFactor": 1.0,
+                "albedoColor": [
+                    0.9607843,
+                    0.0,
+                    0.5568627,
+                    1.0
+                ],
+                "roughnessFactor": 0.0
+            }
+        },
+        "122": {
+            "name": "Wall",
+            "Phong": {
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.99993744699168e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 1,
+                "emissiveColor": [
+                    0.2,
+                    0.2,
+                    0.2,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.05,
+                    0.05,
+                    0.05,
+                    1.0
+                ],
+                "diffuseColor": [
+                    0.5,
+                    0.5,
+                    0.5,
+                    1.0
+                ]
+            },
+            "pipeline": "47",
+            "Physical": {
+                "metallicFactor": 0.0,
+                "albedoColor": [
+                    0.5294116,
+                    0.5294116,
+                    0.5294116,
+                    1.0
+                ],
+                "roughnessFactor": 1.0
+            }
+        },
+        "124": {
+            "link": {
+                "name": "DefaultFontMaterial",
+                "file": "default"
+            },
+            "Text": {
+                "font": "55",
+                "color": [
+                    0.0980392,
+                    0.0980392,
+                    0.0980392,
+                    1.0
+                ],
+                "effectColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.1921568
+                ]
+            },
+            "name": "FontShadowMaterial"
+        },
+        "129": {
+            "link": {
+                "name": "WonderlandPink",
+                "file": "models\\WonderlandLogo.glb"
+            },
+            "pipeline": "34"
+        },
+        "130": {
+            "link": {
+                "name": "WonderlandWhite",
+                "file": "models\\WonderlandLogo.glb"
+            },
+            "pipeline": "34"
+        }
+    },
+    "shaders": {
+        "2": {
+            "link": {
+                "name": "Flat.frag",
+                "file": "default"
+            }
+        },
+        "4": {
+            "link": {
+                "name": "MeshVisualizer.frag",
+                "file": "default"
+            }
+        },
+        "5": {
+            "link": {
+                "name": "Phong.frag",
+                "file": "default"
+            }
+        },
+        "28": {
+            "link": {
+                "name": "Dynamic.vert",
+                "file": "default"
+            }
+        },
+        "30": {
+            "link": {
+                "name": "Skinning.vert",
+                "file": "default"
+            }
+        },
+        "32": {
+            "link": {
+                "name": "DistanceFieldVector.frag",
+                "file": "default"
+            }
+        },
+        "39": {
+            "link": {
+                "name": "Particle.frag",
+                "file": "default"
+            }
+        },
+        "42": {
+            "link": {
+                "name": "Background.frag",
+                "file": "default"
+            }
+        },
+        "43": {
+            "link": {
+                "name": "Depth.frag",
+                "file": "default"
+            }
+        },
+        "45": {
+            "link": {
+                "name": "FullScreenTriangle.vert",
+                "file": "default"
+            }
+        },
+        "46": {
+            "link": {
+                "name": "Physical.frag",
+                "file": "default"
+            }
+        },
+        "49": {
+            "link": {
+                "name": "Sky.frag",
+                "file": "default"
+            }
+        },
+        "50": {
+            "link": {
+                "name": "Text.frag",
+                "file": "default"
+            }
+        },
+        "52": {
+            "link": {
+                "name": "Text.vert",
+                "file": "default"
+            }
+        },
+        "53": {
+            "link": {
+                "name": "TileFeedback.frag",
+                "file": "default"
+            }
+        },
+        "139": {
+            "link": {
+                "name": "AtmosphericSky.frag",
+                "file": "default"
+            }
+        },
+        "140": {
+            "link": {
+                "name": "Color.frag",
+                "file": "default"
+            }
+        }
+    },
+    "settings": {
+        "project": {
+            "name": "wlesky.wlp",
+            "version": [
+                1,
+                6,
+                0
+            ]
+        },
+        "xr": {
+            "leftEyeObject": "18",
+            "rightEyeObject": "19"
+        },
+        "scripting": {
+            "application": {
+                "output": "wlesky.wlp-app.js"
+            },
+            "components": {
+                "output": "wlesky.wlp-bundle.js"
+            }
+        },
+        "rendering": {
+            "hdr": {
+                "tonemapping": "aces approximated"
+            },
+            "sky": {
+                "enabled": true,
+                "material": "26"
+            },
+            "environment": {
+                "enabled": true,
+                "maxSpecularEnvironmentSize": 512,
+                "intensity": 0.8,
+                "bakeExposure": 1.0,
+                "tint": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "mode": "spherical-harmonic-2",
+                "bakingMode": "sky",
+                "material": "26"
+            }
+        },
+        "editor": {
+            "importPhysicalAsPhongMaterials": false
+        },
+        "runtime": {
+            "loadUncompressedImagesAsBitmap": false
+        }
+    },
+    "animations": {},
+    "skins": {},
+    "pipelines": {
+        "33": {
+            "link": {
+                "name": "DistanceFieldVector",
+                "file": "default"
+            }
+        },
+        "34": {
+            "link": {
+                "name": "Flat Opaque",
+                "file": "default"
+            }
+        },
+        "35": {
+            "link": {
+                "name": "Flat Opaque Textured",
+                "file": "default"
+            },
+            "features": {
+                "ALPHA_MASKED": true
+            },
+            "sampleAlphaToCoverage": true
+        },
+        "36": {
+            "link": {
+                "name": "MeshVisualizer",
+                "file": "default"
+            }
+        },
+        "37": {
+            "link": {
+                "name": "Phong Opaque",
+                "file": "default"
+            },
+            "features": {
+                "TONEMAPPING": false,
+                "WITH_EMISSIVE": true
+            }
+        },
+        "38": {
+            "link": {
+                "name": "Phong Opaque Textured",
+                "file": "default"
+            },
+            "features": {
+                "GLOBAL_ILLUMINATION": true,
+                "ALPHA_MASKED": true,
+                "WITH_EMISSIVE": true
+            }
+        },
+        "40": {
+            "link": {
+                "name": "Foliage",
+                "file": "default"
+            },
+            "features": {}
+        },
+        "41": {
+            "link": {
+                "name": "Particle",
+                "file": "default"
+            }
+        },
+        "44": {
+            "link": {
+                "name": "Depth",
+                "file": "default"
+            }
+        },
+        "47": {
+            "link": {
+                "name": "Physical Opaque",
+                "file": "default"
+            },
+            "features": {
+                "GLOBAL_ILLUMINATION": true,
+                "TONEMAPPING": true,
+                "CLEARCOAT": false
+            },
+            "doubleSided": false,
+            "colorWrite": {
+                "alpha": true
+            }
+        },
+        "48": {
+            "link": {
+                "name": "Physical Opaque Textured",
+                "file": "default"
+            },
+            "features": {
+                "ALPHA_MASKED": true,
+                "TONEMAPPING": true,
+                "GLOBAL_ILLUMINATION": true
+            }
+        },
+        "51": {
+            "link": {
+                "name": "Text",
+                "file": "default"
+            },
+            "sampleAlphaToCoverage": true
+        },
+        "54": {
+            "link": {
+                "name": "Sky",
+                "file": "default"
+            },
+            "features": {
+                "GRADIENT_4_STOPS": false,
+                "TEXTURED": false,
+                "GRADIENT": false,
+                "ENVIRONMENT_PROBE": false,
+                "PROCEDURAL": true,
+                "TONEMAPPING": true
+            }
+        },
+        "66": {
+            "link": {
+                "name": "Phong Normalmapped",
+                "file": "default"
+            },
+            "features": {
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "WITH_EMISSIVE": true
+            }
+        },
+        "67": {
+            "link": {
+                "name": "Phong Lightmapped",
+                "file": "default"
+            },
+            "features": {
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "WITH_EMISSIVE": true
+            }
+        },
+        "74": {
+            "link": {
+                "name": "TileFeedback",
+                "file": "default"
+            }
+        },
+        "140": {
+            "link": {
+                "name": "AtmosphericSky",
+                "file": "default"
+            }
+        },
+        "141": {
+            "link": {
+                "name": "Color",
+                "file": "default"
+            }
+        },
+        "142": {
+            "link": {
+                "name": "VertexColor",
+                "file": "default"
+            }
+        }
+    },
+    "textures": {},
+    "images": {},
+    "fonts": {
+        "55": {
+            "link": {
+                "name": "DejaVuSans.ttf",
+                "file": "default"
+            },
+            "outline": true
+        }
+    },
+    "languages": {},
+    "files": {
+        "103": {
+            "fileName": "models/WonderlandShaderBall.glb",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": false,
+            "colorSpace": "srgb",
+            "importSecondaryUVLegacy": true
+        },
+        "134": {
+            "fileName": "models/WonderlandLogo.glb",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": false,
+            "colorSpace": "srgb",
+            "importSecondaryUVLegacy": true
+        }
+    },
+    "morphTargets": {},
+    "audioClips": {},
+    "shaderChunks": {
+        "1": {
+            "link": {
+                "name": "lib\\Color.glsl",
+                "file": "default"
+            }
+        },
+        "2": {
+            "link": {
+                "name": "lib\\Compatibility.glsl",
+                "file": "default"
+            }
+        },
+        "3": {
+            "link": {
+                "name": "lib\\CoordinateSystems.glsl",
+                "file": "default"
+            }
+        },
+        "4": {
+            "link": {
+                "name": "lib\\GI.glsl",
+                "file": "default"
+            }
+        },
+        "5": {
+            "link": {
+                "name": "lib\\Inputs.glsl",
+                "file": "default"
+            }
+        },
+        "6": {
+            "link": {
+                "name": "lib\\Lights.glsl",
+                "file": "default"
+            }
+        },
+        "7": {
+            "link": {
+                "name": "lib\\Materials.glsl",
+                "file": "default"
+            }
+        },
+        "8": {
+            "link": {
+                "name": "lib\\Math.glsl",
+                "file": "default"
+            }
+        },
+        "9": {
+            "link": {
+                "name": "lib\\MorphTargets.glsl",
+                "file": "default"
+            }
+        },
+        "10": {
+            "link": {
+                "name": "lib\\Packing.glsl",
+                "file": "default"
+            }
+        },
+        "11": {
+            "link": {
+                "name": "lib\\PhysicalBSDF.glsl",
+                "file": "default"
+            }
+        },
+        "12": {
+            "link": {
+                "name": "lib\\Quaternion.glsl",
+                "file": "default"
+            }
+        },
+        "13": {
+            "link": {
+                "name": "lib\\SkyProcedural.glsl",
+                "file": "default"
+            }
+        },
+        "14": {
+            "link": {
+                "name": "lib\\Slug.frag.glsl",
+                "file": "default"
+            }
+        },
+        "15": {
+            "link": {
+                "name": "lib\\Slug.vert.glsl",
+                "file": "default"
+            }
+        },
+        "16": {
+            "link": {
+                "name": "lib\\Surface.glsl",
+                "file": "default"
+            }
+        },
+        "17": {
+            "link": {
+                "name": "lib\\Textures.glsl",
+                "file": "default"
+            }
+        },
+        "18": {
+            "link": {
+                "name": "lib\\Uniforms.glsl",
+                "file": "default"
+            }
+        },
+        "19": {
+            "link": {
+                "name": "lib\\VertexAttributes.glsl",
+                "file": "default"
+            }
+        }
+    },
+    "particleEffects": {},
+    "probeVolumeScenarios": {},
+    "plugins": {}
+}

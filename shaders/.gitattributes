@@ -1,0 +1,4 @@
+# We save a significant amount of bytes on the loading screen by using LF
+*.glsl text eol=lf
+*.frag text eol=lf
+*.vert text eol=lf

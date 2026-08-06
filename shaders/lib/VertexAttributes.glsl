@@ -1,0 +1,29 @@
+#define POSITION_SIZE 3
+#ifdef VERTEX_HAS_TEXTURE_COORDS
+#define TEXTURE_COORDS_SIZE 2
+#else
+#define TEXTURE_COORDS_SIZE 0
+#endif
+#ifdef VERTEX_HAS_TEXTURE_COORDS_1
+#define TEXTURE_COORDS_1_SIZE 2
+#else
+#define TEXTURE_COORDS_1_SIZE 0
+#endif
+#ifdef VERTEX_HAS_COLOR
+#define COLOR_SIZE 2
+#else
+#define COLOR_SIZE 0
+#endif
+#ifdef VERTEX_HAS_TANGENT
+#define TANGENT_SIZE 2
+#else
+#define TANGENT_SIZE 0
+#endif
+#ifdef VERTEX_HAS_NORMAL
+#define NORMAL_SIZE 2
+#else
+#define NORMAL_SIZE 0
+#endif
+
+/* Vertex size in floats */
+#define VERTEX_SIZE (POSITION_SIZE + TEXTURE_COORDS_SIZE + TEXTURE_COORDS_1_SIZE + COLOR_SIZE + TANGENT_SIZE + NORMAL_SIZE)
