@@ -25,6 +25,7 @@ fn decodeMaterial(matIndex: u32) -> Material {
 #include "lib/Math.wgsl"
 #include "lib/CoordinateSystems.wgsl"
 #include "lib/Color.wgsl"
+#include "lib/Lights.wgsl"
 #include "lib/SkyProcedural.wgsl"
 
 @fragment
@@ -37,15 +38,26 @@ fn main(
 
     let mat: Material = decodeMaterial(drawUniforms.materialIndex);
 
-    /** @todo: Expose parameters */
-    var params: AtmosphericParams;
-    params.turbidity = 10.0;
-    params.rayleigh = 3.0;
-    params.mieCoefficient = 0.005;
-    params.mieDirectionalG = 0.7;
-    let sunDirection: vec3<f32> = normalize(mat.direction);
+    var lightPos = vec3<f32>(0.0, 1.0, 0.5);
+    var lightDir = normalize(vec3<f32>(mat.direction));
+    var lightCol = vec3<f32>(1.0);
+    var isNight: f32 = 0.0;
+    var animTime: f32 = 0.0;
 
-    var color: vec3<f32> = evaluateAthmosphericSky(direction, sunDirection, params)*mat.exposure;
+    #if NUM_LIGHTS > 0
+    lightPos = lightPositionsWorld[0];
+    isNight = select(0.0, 1.0, lightPos.x >= 0.5);
+    animTime = lightPos.y;
+
+    if (length(lightDirectionsWorld[0]) > 0.01) {
+        lightDir = normalize(-lightDirectionsWorld[0]);
+    } else if (length(lightPos) > 0.01) {
+        lightDir = normalize(lightPos);
+    }
+    lightCol = lightColors[0].rgb * max(0.1, lightColors[0].a);
+    #endif
+
+    var color: vec3<f32> = evaluateUltraStylizedSky(direction, lightDir, lightCol, isNight, animTime) * f32(mat.exposure);
 
     #ifdef TONEMAPPING
     /* Apply exposure */

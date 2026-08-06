@@ -29,6 +29,7 @@ Material decodeMaterial(uint matIndex) {
 #include "lib/Math.glsl"
 #include "lib/CoordinateSystems.glsl"
 #include "lib/Color.glsl"
+#include "lib/Lights.glsl"
 #include "lib/SkyProcedural.glsl"
 
 void main() {
@@ -37,14 +38,27 @@ void main() {
 
     Material mat = decodeMaterial(material);
 
-    /** @todo: Expose parameters */
-    AtmosphericParams params;
-    params.turbidity = 10.0;
-    params.rayleigh = 3.0;
-    params.mieCoefficient = 0.005;
-    params.mieDirectionalG = 0.7;
-    vec3 sunDirection = normalize(mat.direction);
-    vec3 color = evaluateAthmosphericSky(direction, sunDirection, params)*mat.exposure;
+    // Default fallbacks
+    vec3 lightPos = vec3(0.0, 1.0, 0.5);
+    vec3 lightDir = normalize(mat.direction);
+    vec3 lightCol = vec3(1.0);
+    float isNight = 0.0;
+    float animTime = 0.0;
+
+    #if NUM_LIGHTS > 0
+    lightPos = lightPositionsWorld[0];
+    isNight = (lightPos.x >= 0.5) ? 1.0 : 0.0;
+    animTime = lightPos.y;
+
+    if (length(lightDirectionsWorld[0]) > 0.01) {
+        lightDir = normalize(-lightDirectionsWorld[0]);
+    } else if (length(lightPos) > 0.01) {
+        lightDir = normalize(lightPos);
+    }
+    lightCol = lightColors[0].rgb * max(0.1, lightColors[0].a);
+    #endif
+
+    vec3 color = evaluateUltraStylizedSky(direction, lightDir, lightCol, isNight, animTime) * mat.exposure;
 
     #ifdef TONEMAPPING
     /* Apply exposure */

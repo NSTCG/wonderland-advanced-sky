@@ -16,15 +16,15 @@
                 0.999996
             ],
             "translation": [
-                0.0,
-                1.8000596,
-                4.9999995
+                2.3842039809096605e-7,
+                2.2979977,
+                -2.8126804
             ],
             "rotation": [
-                -9.912712357618148e-7,
-                -0.0,
-                0.000001,
-                1.0
+                -0.0000012,
+                0.9783287,
+                -0.2070579,
+                2.1970062391574174e-7
             ]
         },
         "15": {
@@ -122,7 +122,7 @@
                 {
                     "type": "light",
                     "light": {
-                        "intensity": 0.7009999,
+                        "intensity": 1.0,
                         "shadows": true,
                         "type": "sun",
                         "shadowRange": 50.0
@@ -460,6 +460,34 @@
                 0.0,
                 -4.0
             ]
+        },
+        "139": {
+            "name": "Mesh",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "131"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                2.2385535,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
         }
     },
     "meshes": {
@@ -718,8 +746,8 @@
             },
             "AtmosphericSky": {
                 "direction": [
-                    1.0,
-                    1.0,
+                    0.0,
+                    0.5,
                     1.0
                 ],
                 "exposure": 1.0
@@ -902,6 +930,47 @@
                 "file": "models\\WonderlandLogo.glb"
             },
             "pipeline": "34"
+        },
+        "131": {
+            "name": "Yellow Copy",
+            "Phong": {
+                "diffuseColor": [
+                    0.9098039,
+                    0.0,
+                    0.5411763,
+                    1.0
+                ],
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.999911299019004e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 10,
+                "ambientColor": [
+                    0.05,
+                    0.05,
+                    0.05,
+                    1.0
+                ],
+                "emissiveColor": [
+                    0.317647,
+                    0.0,
+                    0.2165776,
+                    1.0
+                ]
+            },
+            "pipeline": "47",
+            "Physical": {
+                "albedoColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 0.0
+            }
         }
     },
     "shaders": {

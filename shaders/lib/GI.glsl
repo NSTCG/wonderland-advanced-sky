@@ -4,6 +4,8 @@
  * Dependencies:
  *     - Textures.glsl
  *     - CoordinateSystems.glsl
+ *     - Lights.glsl
+ *     - SkyProcedural.glsl
  */
 
 #define MAX_ENV_SPECULAR_MIPS (5.0 - 1.0)
@@ -11,6 +13,9 @@
 #if NUM_ENV_BANDS > 0
 #define GLOBAL_ENVIRONMENT_PROBE
 #endif
+
+#include "Lights.glsl"
+#include "SkyProcedural.glsl"
 
 #ifdef PROBE_VOLUME
 
@@ -60,19 +65,6 @@ vec3 environmentIrradiance(vec3 d) {
 
 /**
  * Raw prefiltered environment
- *
- * @note This is **not** pre-multiplied with the BRDF.
- *
- * Usage:
- *
- * @code{.glsl}
- * vec3 kS = EnvBRDFApprox(f0, roughness, max(dot(normal, view), 0.0));
- * vec3 color = prefilteredEnvironmentRadiance(texture, ray, roughness);
- * vec3 specular = kS*color;
- * @endcode
- *
- * @param reflected The reflected vector, in **world space**, used to fetch the environment
- * @param perceptualRoughness The perceptual roughness
  */
 vec3 prefilteredEnvironmentRadiance(vec3 reflected, float perceptualRoughness) {
     float mip = perceptualRoughness * MAX_ENV_SPECULAR_MIPS;
@@ -110,27 +102,30 @@ vec3 EnvBRDFApprox(vec3 specularColor, mediump float roughness, mediump float Nd
  */
 vec3 evaluateEnvironmentIrradiance(vec3 d) {
     #ifdef GLOBAL_ENVIRONMENT_PROBE
-    /** @todo: BRDF could be baked into the spherical harmonics, but then the same
-     * environment isn't easily usable in a Phong shader. */
     return environmentIrradiance(d)*RECIPROCAL_PI;
     #else
-    return vec3(0.0);
+    vec3 lightPos = vec3(0.0, 1.0, 0.5);
+    vec3 lightDir = vec3(0.0, 1.0, 0.0);
+    vec3 lightCol = vec3(1.0);
+    float isNight = 0.0;
+    float animTime = 0.0;
+    #if NUM_LIGHTS > 0
+    lightPos = lightPositionsWorld[0];
+    isNight = lightPos.x >= 0.5 ? 1.0 : 0.0;
+    animTime = lightPos.y;
+    if (length(lightDirectionsWorld[0]) > 0.01) {
+        lightDir = normalize(-lightDirectionsWorld[0]);
+    } else if (length(lightPos) > 0.01) {
+        lightDir = normalize(lightPos);
+    }
+    lightCol = lightColors[0].rgb * max(0.1, lightColors[0].a);
+    #endif
+    return evaluateAtmosphericSkyFast(d, lightDir, lightCol, isNight, animTime) * RECIPROCAL_PI;
     #endif
 }
 
 /**
  * Evaluate the entire environment contribution, i.e., diffuse and specular.
- *
- * @note This method computes the energy conservation ratio between the diffuse
- * and specular components using @ref EnvBRDFApprox.
- *
- * @param normal The normal, in **world space**
- * @param view The view, in **world space**
- * @param diffuse Surface diffuse component
- * @param perceptualRoughness Perceptual roughness
- * @param f0 Specular f0
- * @param clearCoatRoughness Roughness of the clear coat
- * @param clearCoatFactor Factor of the clear coat
  */
 vec3 evaluateEnvironment(vec3 normal, vec3 view, vec3 diffuse, float perceptualRoughness, vec3 f0) {
     #ifdef GLOBAL_ENVIRONMENT_PROBE
@@ -141,44 +136,77 @@ vec3 evaluateEnvironment(vec3 normal, vec3 view, vec3 diffuse, float perceptualR
     mediump vec3 cosineWeightedIrradiance = irradiance*RECIPROCAL_PI;
     mediump vec3 radiance = prefilteredEnvironmentRadiance(normal, view, perceptualRoughness);
 
-    /* Multiple scattering approximation from:
-     * "A Multiple-Scattering Microfacet Model for Real-Time Image-based Lighting" */
     mediump vec2 fab = preIntegratedGGX(perceptualRoughness, NdotV);
 
     mediump vec3 FssEss = f0 * fab.x + fab.y;
     mediump float Ess = fab.x + fab.y;
     mediump float Ems = 1.0 - Ess;
-    /* `1/21` replaced by `0.047619` */
     mediump vec3 Favg = f0 + (1.0 - f0) * 0.047619;
-    /* `1 - Ess` replaced by `Ems` */
     mediump vec3 Fms = FssEss*Favg/(1.0 - Ems*Favg);
     mediump vec3 FmsEms = Fms*Ems;
     mediump vec3 Edss = vec3(1.0) - (FssEss + FmsEms);
 
-    /* `diffuse` is already cosine-weighted */
     return FssEss*radiance + FmsEms*cosineWeightedIrradiance + diffuse*irradiance*Edss;
     #else
-    return vec3(0.0);
+    // Dynamic Sky Environment Fallback
+    vec3 lightPos = vec3(0.0, 1.0, 0.5);
+    vec3 lightDir = vec3(0.0, 1.0, 0.0);
+    vec3 lightCol = vec3(1.0);
+    float isNight = 0.0;
+    float animTime = 0.0;
+
+    #if NUM_LIGHTS > 0
+    lightPos = lightPositionsWorld[0];
+    isNight = lightPos.x >= 0.5 ? 1.0 : 0.0;
+    animTime = lightPos.y;
+    if (length(lightDirectionsWorld[0]) > 0.01) {
+        lightDir = normalize(-lightDirectionsWorld[0]);
+    } else if (length(lightPos) > 0.01) {
+        lightDir = normalize(lightPos);
+    }
+    lightCol = lightColors[0].rgb * max(0.1, lightColors[0].a);
+    #endif
+
+    vec3 reflectWS = normalize(reflect(-view, normal));
+    vec3 dynamicRadiance = evaluateAtmosphericSkyFast(reflectWS, lightDir, lightCol, isNight, animTime);
+    vec3 dynamicIrradiance = evaluateAtmosphericSkyFast(normal, lightDir, lightCol, isNight, animTime);
+
+    mediump float NdotV = max(dot(normal, view), 0.0);
+    vec3 FssEss = EnvBRDFApprox(f0, perceptualRoughness, NdotV);
+
+    return FssEss * dynamicRadiance + (vec3(1.0) - FssEss) * diffuse * dynamicIrradiance * RECIPROCAL_PI;
     #endif
 }
 
 #ifdef CLEARCOAT
 vec3 evaluateEnvironmentClearCoat(vec3 normal, vec3 view, vec3 diffuse, float perceptualRoughness, vec3 f0, float occlusion, ClearCoatData clearCoat) {
-    #ifdef GLOBAL_ENVIRONMENT_PROBE
     vec3 contribution = evaluateEnvironment(normal, view, diffuse, perceptualRoughness, f0);
     if(clearCoat.factor > 0.0) {
         mediump float clearCoatNoV = max(dot(clearCoat.normal, view), 0.0);
         mediump vec3 fresnelClearCoat = fresnelSchlick(CLEAR_COAT_F0, clearCoatNoV) * clearCoat.factor;
+        vec3 reflectWS = normalize(reflect(-view, clearCoat.normal));
+        vec3 lightPos = vec3(0.0, 1.0, 0.5);
+        vec3 lightDir = vec3(0.0, 1.0, 0.0);
+        vec3 lightCol = vec3(1.0);
+        float isNight = 0.0;
+        float animTime = 0.0;
+        #if NUM_LIGHTS > 0
+        lightPos = lightPositionsWorld[0];
+        isNight = lightPos.x >= 0.5 ? 1.0 : 0.0;
+        animTime = lightPos.y;
+        if (length(lightDirectionsWorld[0]) > 0.01) {
+            lightDir = normalize(-lightDirectionsWorld[0]);
+        } else if (length(lightPos) > 0.01) {
+            lightDir = normalize(lightPos);
+        }
+        lightCol = lightColors[0].rgb * max(0.1, lightColors[0].a);
+        #endif
+        vec3 skyReflect = evaluateAtmosphericSkyFast(reflectWS, lightDir, lightCol, isNight, animTime);
 
-        mediump vec3 kScc = EnvBRDFApprox(CLEAR_COAT_F0, clearCoat.perceptualRoughness, clearCoatNoV)
-            * prefilteredEnvironmentRadiance(clearCoat.normal, view, clearCoat.perceptualRoughness);
-
+        mediump vec3 kScc = EnvBRDFApprox(CLEAR_COAT_F0, clearCoat.perceptualRoughness, clearCoatNoV) * skyReflect;
         contribution = (vec3(1.0) - fresnelClearCoat)*contribution + clearCoat.factor*kScc;
     }
     return occlusion*contribution;
-    #else
-    return vec3(0.0);
-    #endif
 }
 #endif
 
@@ -196,16 +224,12 @@ vec3 mainProbeVolume(vec3 position, vec3 d) {
     position -= probeAABB[0].xyz;
 
     float irradianceBrickSizeWorld = probeMetadata.x;
-    /* Read indirection based on position inside the volume */
     ivec3 index3d = ivec3(position/vec3(irradianceBrickSizeWorld));
     uvec4 posAndLod = texelFetch(probeIndirection, index3d, 0);
 
-    /* Use indirection to retrieve the brick SH */
     float lodSizeWorld = pow(3.0, float(posAndLod.w))*irradianceBrickSizeWorld;
 
-    /* [0..1] in the current brick space */
     vec3 offset = fract(position/lodSizeWorld);
-    /* Probe location, in texel space */
     vec3 physicalLoc = vec3(4u*posAndLod.xyz) + 3.0*offset;
 
     vec3 physicalTexSize = vec3(textureSize(probeVolume, 0));
@@ -223,7 +247,6 @@ vec3 mainProbeVolume(vec3 position, vec3 d) {
     vec3 sh2 = vec3(rSample.b, gSample.b, bSample.b);
     vec3 sh3 = vec3(rSample.a, gSample.a, bSample.a);
 
-    /** @todo: Use matrix for simd. */
     vec3 result = sh0 * (0.282095*3.141593);
     result += sh1 * (0.282095*2.094395) * d.y;
     result += sh2 * (0.282095*2.094395) * d.z;

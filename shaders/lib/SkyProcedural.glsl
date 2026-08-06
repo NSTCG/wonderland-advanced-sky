@@ -1,172 +1,212 @@
 /**
- * References:
- *     - https://github.com/mrdoob/three.js/blob/master/examples/jsm/objects/Sky.js
- *     - "A Practical Analytic Model for Daylight", Preetham, A. J., Shirley, P., and Smits, B.
- *     - "An Analytic Model for Full Spectral Sky-Dome Radiance", Hosek, L., and Wilkie, A.
- *     - "Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite", Hillaire, S.
+ * Ultra-Stylized Sky Procedural Library (GLSL)
+ *
+ * Features:
+ * - Dynamic Day/Night gradients (Noon, Sunset, Midnight)
+ * - Light-interacting procedural clouds with rim lighting
+ * - Twinkling star field at night
+ * - Animated Aurora Borealis curtains
+ * - Sun disk with solar corona & Moon disk with crescent glow
+ * - Fast environment reflection lookup (evaluateAtmosphericSkyFast)
  */
 
-/* 3.0 / (16.0*PI) */
-#define THREE_OVER_SIXTEENPI 0.05968310365946075
-/* 1.0 / (4.0 * PI) */
-#define RECIPROCAL_PI4 0.07957747154594767
-#define HORIZON_CUTOFF vec3(0.3, 0.3, 0.3)
+#ifndef SKY_PROCEDURAL_GLSL
+#define SKY_PROCEDURAL_GLSL
 
-/**
- * Input for @ref evaluateAthmosphericSky()
- */
-struct AtmosphericParams {
-    mediump float turbidity;
-    mediump float rayleigh;
-    mediump float mieCoefficient;
-    mediump float mieDirectionalG;
-};
+/* Noise & Hash Utilities */
+float skyHash12(vec2 p) {
+    vec3 p3  = fract(vec3(p.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
 
-/*
- * @todo: Pass the entire Rayleigh coefficient as a uniform.
- *
- * Pre-calculation of the total Rayleigh scattering coefficients Beta_r variable:
- *
- * (8.0 * pow(pi, 3.0) * pow(pow(n, 2.0) - 1.0, 2.0) * (6.0 + 3.0 * pn)) / (3.0 * N * pow(lambda, vec3(4.0)) * (6.0 - 7.0 * pn))
- *
- * - n: Air refractive index (1.0003)
- * - N: Number of molecules per unit volume for air at 288.15K and 1013mb (sea level -45 celsius) (2.545e25)
- * - Lambda: Wavelength of used primaries, according to preetham vec3( 680E-9, 550E-9, 450E-9 )
- *
- * From: "A Practical Analytic Model for Dayligh", page 98
- */
-const vec3 PrecomputedBetaR = vec3(5.804542996261093E-6, 1.3562911419845635E-5, 3.0265902468824876E-5);
+float skyNoise2D(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = skyHash12(i);
+    float b = skyHash12(i + vec2(1.0, 0.0));
+    float c = skyHash12(i + vec2(0.0, 1.0));
+    float d = skyHash12(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
 
-/**
- * @todo: Pass the entire Mie coefficient as a uniform.
- *
- * Pre-calculation of part of the total Mie scattering coefficient:
- * pi * pow((2.0 * pi) / lambda, vec3(v - 2.0)) * K
- *
- * - lambda: Wavelength
- * - v: Junge's exponent (4)
- * - K: coefficient for the primaries vec3(0.686, 0.678, 0.666)
- */
-const vec3 PrecomputedBetaM = vec3(1.8399918514433978E14, 2.7798023919660528E14, 4.0790479543861094E14);
-
-/**
- * Compute the Mie total scattering coefficient as described in:
- * "A Practical Analytic Model for Dayligh", page 98
- *
- * , with "turbidity" the measure of haze.
- * Example: with 1 being pure air, and ~64 thin fog.
- *
- * @param T The turbidity
- */
-vec3 totalMieScattering(float T) {
-    float c = 0.2*T*10E-18;
-    return 0.434*c*PrecomputedBetaM;
+float skyFbm2D(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
+    for (int i = 0; i < 4; ++i) {
+        v += a * skyNoise2D(p);
+        p = rot * p * 2.0;
+        a *= 0.5;
+    }
+    return v;
 }
 
 /**
- * Rayleigh phase function
- *
- * 3 / 16π * (1 + cos(θ)^2)
- *
- * References:
- *     - From "An Analytic Model for Full Spectral Sky-Dome Radiance", page 3.
- *
- * @param cosTheta Cosinus of the angle between the (in/out)-scattering directions
+ * Fast dynamic sky evaluation for environment reflection & ambient lighting
  */
-float rayleighPhase(mediump float cosTheta) {
-    mediump float cosTheta2 = cosTheta*cosTheta;
-    return THREE_OVER_SIXTEENPI*(1.0 + cosTheta2);
+vec3 evaluateAtmosphericSkyFast(vec3 viewDir, vec3 lightDir, vec3 lightColor, float isNight, float animTime) {
+    float y = clamp(viewDir.y, 0.0, 1.0);
+    float sunCos = dot(lightDir, vec3(0.0, 1.0, 0.0));
+
+    vec3 skyZenith;
+    vec3 skyHorizon;
+
+    if (isNight < 0.5) {
+        // DAY
+        if (sunCos < 0.25) {
+            // Sunset / Sunrise
+            float t = clamp(sunCos / 0.25, 0.0, 1.0);
+            skyZenith = mix(vec3(0.12, 0.08, 0.32), vec3(0.08, 0.35, 0.85), t);
+            skyHorizon = mix(vec3(1.0, 0.32, 0.10), vec3(0.45, 0.75, 0.98), t);
+        } else {
+            // Bright Day
+            skyZenith = vec3(0.08, 0.35, 0.85);
+            skyHorizon = vec3(0.45, 0.75, 0.98);
+        }
+    } else {
+        // NIGHT
+        skyZenith = vec3(0.02, 0.04, 0.14);
+        skyHorizon = vec3(0.08, 0.14, 0.35);
+    }
+
+    vec3 color = mix(skyHorizon, skyZenith, pow(y, 0.7));
+    return color * lightColor;
 }
 
 /**
- * Mie-scattering phase, also known as haze "aerosol" scattering,
- * approximated by the Henyey-Greenstein phase function.
- *
- *
- *                   1 - g^2
- * -------------------------------------------
- *        4*PI*(1 + g^2 - 2g*cos(θ))^1.5
- *
- * References:
- *     - https://pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions
- *
- * @param cosTheta Cosinus of the angle between the (in/out)-scattering directions
+ * Full Ultra-Stylized Sky Shader evaluation
  */
-float hgPhase(mediump float cosTheta, mediump float g) {
-    mediump float g2 = g*g;
-    mediump float inverse = 1.0/pow(1.0 - 2.0*g*cosTheta + g2, 1.5);
-    return RECIPROCAL_PI4*((1.0 - g2)*inverse);
+vec3 evaluateUltraStylizedSky(
+    vec3 viewDir,
+    vec3 lightDir,
+    vec3 lightColor,
+    float isNight,
+    float animTime
+) {
+    vec3 dir = normalize(viewDir);
+    float viewY = clamp(dir.y, -0.1, 1.0);
+    float skyHeight = max(0.0, viewY);
+
+    float sunCosZenith = dot(lightDir, vec3(0.0, 1.0, 0.0));
+    float cosTheta = dot(dir, lightDir);
+
+    // --- 1. Dynamic Vibrant Sky Gradient ---
+    vec3 skyZenith;
+    vec3 skyHorizon;
+    vec3 skyGround = vec3(0.05, 0.07, 0.12);
+
+    if (isNight < 0.5) {
+        // DAY MODE
+        if (sunCosZenith < 0.3) {
+            // Sunset / Sunrise vibrant warm palette
+            float t = clamp(sunCosZenith / 0.3, 0.0, 1.0);
+            skyZenith  = mix(vec3(0.16, 0.06, 0.35), vec3(0.06, 0.32, 0.82), t);
+            skyHorizon = mix(vec3(1.0, 0.28, 0.08), vec3(0.42, 0.75, 0.98), t);
+        } else {
+            // Bright Daylight palette
+            float t = clamp((sunCosZenith - 0.3) / 0.7, 0.0, 1.0);
+            skyZenith  = mix(vec3(0.06, 0.32, 0.82), vec3(0.04, 0.26, 0.75), t);
+            skyHorizon = mix(vec3(0.42, 0.75, 0.98), vec3(0.60, 0.85, 1.0), t);
+        }
+    } else {
+        // NIGHT MODE
+        float t = clamp(sunCosZenith, 0.0, 1.0);
+        skyZenith  = mix(vec3(0.015, 0.03, 0.12), vec3(0.01, 0.02, 0.08), t);
+        skyHorizon = mix(vec3(0.06, 0.12, 0.32), vec3(0.10, 0.18, 0.42), t);
+    }
+
+    vec3 skyColor = mix(skyHorizon, skyZenith, pow(skyHeight, 0.65));
+    if (dir.y < 0.0) {
+        skyColor = mix(skyHorizon, skyGround, clamp(-dir.y * 5.0, 0.0, 1.0));
+    }
+
+    // --- 2. Celestial Body (Sun / Moon Disk) ---
+    vec3 celestialGlow = vec3(0.0);
+    if (isNight < 0.5) {
+        // Sun Disk & Corona
+        float sunAngle = max(0.0, cosTheta);
+        float sunDisk = smoothstep(0.9985, 0.9995, sunAngle);
+        float sunCorona = pow(sunAngle, 64.0) * 0.7 + pow(sunAngle, 8.0) * 0.25;
+        vec3 sunColor = mix(vec3(1.0, 0.5, 0.2), vec3(1.0, 0.98, 0.88), clamp(sunCosZenith * 3.0, 0.0, 1.0));
+        celestialGlow = (sunDisk * 5.0 + sunCorona * 1.5) * sunColor;
+    } else {
+        // Moon Disk & Lunar Glow
+        float moonAngle = max(0.0, cosTheta);
+        float moonDisk = smoothstep(0.9970, 0.9985, moonAngle);
+        // Crescent mask
+        vec3 offsetLightDir = normalize(lightDir + vec3(0.015, 0.01, 0.0));
+        float crescentMask = smoothstep(0.9968, 0.9982, dot(dir, offsetLightDir));
+        moonDisk = clamp(moonDisk - crescentMask, 0.0, 1.0);
+
+        float moonGlow = pow(moonAngle, 32.0) * 0.6 + pow(moonAngle, 6.0) * 0.2;
+        vec3 moonColor = vec3(0.75, 0.88, 1.0);
+        celestialGlow = (moonDisk * 3.5 + moonGlow * 0.8) * moonColor;
+    }
+
+    // --- 3. Twinkling Stars (Night Only) ---
+    vec3 starColor = vec3(0.0);
+    if (isNight >= 0.5 || sunCosZenith < 0.1) {
+        vec2 starUV = dir.xz / (dir.y + 0.15) * 80.0;
+        float starPattern = skyHash12(floor(starUV));
+        if (starPattern > 0.975) {
+            float twinkle = sin(animTime * 4.0 + starPattern * 100.0) * 0.5 + 0.5;
+            float intensity = pow((starPattern - 0.975) / 0.025, 2.0) * twinkle;
+            float nightFade = isNight >= 0.5 ? 1.0 : clamp((0.1 - sunCosZenith) / 0.1, 0.0, 1.0);
+            starColor = vec3(0.9, 0.95, 1.0) * intensity * nightFade * skyHeight;
+        }
+    }
+
+    // --- 4. Aurora Borealis Curtains (Night Upper Sky) ---
+    vec3 auroraColor = vec3(0.0);
+    if (isNight >= 0.5 && dir.y > 0.15) {
+        vec2 auroraUV = dir.xz / (dir.y + 0.2) * 2.5 + vec2(animTime * 0.15, animTime * 0.08);
+        float wave1 = sin(auroraUV.x * 4.0 + animTime * 1.2) * 0.5 + 0.5;
+        float wave2 = skyFbm2D(auroraUV * 3.0);
+        float auroraMask = smoothstep(0.3, 0.7, wave1 * wave2) * smoothstep(0.15, 0.6, dir.y);
+
+        vec3 auroraPalette = mix(vec3(0.1, 0.95, 0.55), vec3(0.55, 0.15, 0.95), sin(auroraUV.x * 2.0) * 0.5 + 0.5);
+        auroraColor = auroraPalette * auroraMask * 0.8;
+    }
+
+    // --- 5. Light-Interacting Procedural Clouds ---
+    vec3 cloudColor = vec3(0.0);
+    float cloudAlpha = 0.0;
+    if (dir.y > 0.02) {
+        vec2 cloudUV = dir.xz / (dir.y + 0.3) * 1.8 + vec2(animTime * 0.05, animTime * 0.02);
+        float cNoise = skyFbm2D(cloudUV);
+        float cDensity = smoothstep(0.42, 0.75, cNoise);
+
+        if (cDensity > 0.01) {
+            // Cloud light interaction (top rim lighting & sun scattering)
+            float lightScatter = max(0.0, dot(dir, lightDir));
+            float rimLight = pow(lightScatter, 4.0) * 1.2;
+
+            vec3 cLit;
+            vec3 cShadow;
+
+            if (isNight < 0.5) {
+                // Day / Sunset cloud shading
+                vec3 sunTint = mix(vec3(1.0, 0.45, 0.2), vec3(1.0, 0.98, 0.90), clamp(sunCosZenith * 2.5, 0.0, 1.0));
+                cLit = mix(vec3(0.95, 0.95, 1.0), sunTint, 0.5) * (1.0 + rimLight);
+                cShadow = mix(vec3(0.2, 0.25, 0.45), vec3(0.5, 0.2, 0.3), clamp(1.0 - sunCosZenith * 3.0, 0.0, 1.0));
+            } else {
+                // Night cloud shading
+                cLit = vec3(0.3, 0.4, 0.6) * (1.0 + rimLight * 0.5);
+                cShadow = vec3(0.05, 0.08, 0.18);
+            }
+
+            cloudColor = mix(cShadow, cLit, clamp(cNoise * 1.5, 0.0, 1.0));
+            cloudAlpha = cDensity * smoothstep(0.02, 0.25, dir.y);
+        }
+    }
+
+    // --- 6. Final Composition ---
+    vec3 finalSky = skyColor + celestialGlow + starColor + auroraColor;
+    finalSky = mix(finalSky, cloudColor, cloudAlpha * 0.85);
+
+    return finalSky;
 }
 
-/**
- * Analytical computation of the sky
- *
- * @param direction The view direction
- * @param sunDirection Direction toward the sun
- * @param params Set of params to feed to the Preetham model
- */
-vec3 evaluateAthmosphericSky(vec3 direction, vec3 sunDirection, AtmosphericParams params) {
-    /** Uniforms. @todo: Expose */
-    const mediump vec3 ambient = vec3(0.0, 0.0003, 0.00075);
-
-    mediump float sunCosAngle = dot(sunDirection, vec3(0.0, 1.0, 0.0));
-
-    /*
-     * Optical mass `m`, from "A Practical Analytic Model for Dayligh", page 98:
-     *
-     *                        1
-     * ____________________________________________________________
-     * cos(theta_s) + 0.15 * (93.885 - theta_s * 180.0/PI)^(-1.253)
-     */
-    mediump float zenithAngleCos = max(0.0, dot(direction, vec3(0.0, 1.0, 0.0)));
-    mediump float opticalMass = 1.0/(zenithAngleCos + 0.15 * pow(93.885 - ((acos(zenithAngleCos)*180.0)/PI), -1.253));
-
-    /* Extinction factor from both types of particles */
-
-    /* Rayleigh coefficient */
-    /** @todo: Should be pre-computed as well and passed as a uniform */
-    vec3 beta_r = PrecomputedBetaR*params.rayleigh;
-    /* Mie coefficient */
-    /** @todo: Should be pre-computed as well and passed as a uniform */
-    vec3 beta_m = totalMieScattering(params.turbidity)*params.mieCoefficient;
-
-    const float rayleighZenithLength = 8.4E3;
-    const float mieZenithLength = 1.25E3;
-    vec3 tau = exp(-rayleighZenithLength*opticalMass*beta_r - mieZenithLength*opticalMass*beta_m);
-
-    /* `cosTheta` must be a highp for the sun disk equation */
-    float cosTheta = dot(direction, sunDirection);
-
-    /* Sun luminance */
-
-    const mediump float EE = 1000.0; /* Maximum luminance at zenith */
-    const mediump float cutoffAngle = 1.6110731556870734; /* Earth shadow hack: PI / 1.95 */
-    const mediump float steepness = 1.5;
-    float luminance = EE*max(0.0, 1.0 - exp(-(cutoffAngle - acos(sunCosAngle))/steepness));
-
-    /* Direct sun light: Visual sun disk */
-
-    /* Transmittance on disk "Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite", page 27 */
-    /* cos(0.03), 0.03 being the angular diameter */
-    vec3 L0 = smoothstep(-0.01, 0.1, direction.y)* /* Hide disk below horizon line */
-        smoothstep(0.99955, 0.99955 + 0.0003, cosTheta)*
-        luminance*EE*tau;
-
-    /* In-scattering term */
-
-    mediump float rPhase = rayleighPhase(cosTheta*0.5 + 0.5); /* Remap cosTheta to prevent back scattering */
-    mediump float mPhase = hgPhase(cosTheta, params.mieDirectionalG);
-
-    vec3 light = luminance*(beta_r*rPhase + beta_m*mPhase)/(beta_r + beta_m);
-
-    vec3 Lin = pow(light*(1.0 - tau), vec3(1.5));
-    Lin *= mix(vec3(1.0), pow(light*tau, vec3(0.5)), clamp(pow(1.0 - sunCosAngle, 5.0), 0.0, 1.0));
-
-    #ifdef HORIZON_CUTOFF
-    mediump float horizon = smoothstep(-0.05, 0.0, dot(direction, vec3(0.0, 1.0, 0.0)));
-    Lin *= mix(HORIZON_CUTOFF, vec3(1.0), horizon);
-    #endif
-
-    /* `0.04` to apply a default exposure to the in-scattering term to avoid extremely bright environment */
-    return ambient + L0 + Lin*0.04;
-}
+#endif // SKY_PROCEDURAL_GLSL
