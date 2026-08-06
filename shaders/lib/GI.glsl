@@ -17,8 +17,7 @@
 #ifndef GI_GLSL
 #define GI_GLSL
 
-#include "Lights.glsl"
-#include "SkyProcedural.glsl"
+#include "lib/SkyProcedural.glsl"
 
 #ifdef PROBE_VOLUME
 

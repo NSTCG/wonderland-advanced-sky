@@ -2,8 +2,7 @@
  * Set of functions dedicated to Global Illumination (WGSL)
  */
 
-#include "Lights.wgsl"
-#include "SkyProcedural.wgsl"
+#include "lib/SkyProcedural.wgsl"
 
 #ifdef PROBE_VOLUME
 
