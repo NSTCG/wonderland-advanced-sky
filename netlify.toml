@@ -1,0 +1,3 @@
+[build]
+  command = "python3 -m zipfile -e deploy.zip deploy"
+  publish = "deploy"
