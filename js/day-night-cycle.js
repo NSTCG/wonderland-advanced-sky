@@ -4,14 +4,17 @@ import {quat} from 'gl-matrix';
 /**
  * DayNightCycleComponent
  * 
- * Controls orbital rotation, day/night state, animation time loop,
- * and dynamic light color/intensity changes for Wonderland Engine.
+ * Manages celestial trajectory and state:
+ * - Default 30° Y/Z tilt
+ * - Day cycle: 90° (Sunrise) -> -90° (Sunset) around X-axis
+ * - Night cycle: -90° (Moonrise) -> 90° (Moonset) around X-axis
+ * - Seamless light color and intensity blending at horizon transition points
  */
 export class DayNightCycleComponent extends Component {
     static TypeName = 'day-night-cycle';
     static Properties = {
         dayDuration: Property.float(60.0),   /* Duration in seconds of a full day/night cycle */
-        tiltAngleDeg: Property.float(50.0),  /* Z-axis tilt angle in degrees to avoid top-down shadows */
+        tiltAngleDeg: Property.float(30.0),  /* Y-tilt angle in degrees (default 30°) */
     };
 
     init() {
@@ -30,67 +33,83 @@ export class DayNightCycleComponent extends Component {
         const cycleProgress = (this.time % totalDuration) / totalDuration; // 0.0 to 1.0
         const isNight = cycleProgress >= 0.5;
 
-        // Angle for celestial rotation around X-axis (0 to PI for Day, 0 to PI for Night)
-        let angleRad = 0;
+        let xDeg = 0.0;
         if (!isNight) {
-            // Day cycle: 0 to 180 degrees (0 to PI)
-            angleRad = (cycleProgress / 0.5) * Math.PI;
+            // DAY CYCLE: 90° (Sunrise) to -90° (Sunset)
+            const tDay = cycleProgress / 0.5; // 0.0 to 1.0
+            xDeg = 90.0 - tDay * 180.0;
         } else {
-            // Night cycle: rotates back 0 to 180 degrees (0 to PI)
-            angleRad = ((cycleProgress - 0.5) / 0.5) * Math.PI;
+            // NIGHT CYCLE: -90° (Moonrise) to 90° (Moonset)
+            const tNight = (cycleProgress - 0.5) / 0.5; // 0.0 to 1.0
+            xDeg = -90.0 + tNight * 180.0;
         }
 
-        // Apply 50 deg tilt on Z-axis + orbital rotation around X-axis
-        const tiltRad = (this.tiltAngleDeg * Math.PI) / 180.0;
+        // Apply rotation: X = xDeg, Y = 30° tilt, Z = 0
+        const xRad = (xDeg * Math.PI) / 180.0;
+        const yRad = (this.tiltAngleDeg * Math.PI) / 180.0;
+
         const q = quat.create();
-        quat.rotateZ(q, q, tiltRad);
-        quat.rotateX(q, q, isNight ? -angleRad : angleRad);
+        quat.rotateY(q, q, yRad);
+        quat.rotateX(q, q, xRad);
         this.object.setRotationLocal(q);
 
-        // Smooth time loop between -5.0 and 5.0 for shader animation (waves/clouds/stars)
+        // Smooth time loop between -5.0 and 5.0 for continuous wave/cloud shader animation
         const timeSpeed = 1.0;
-        const loopSpan = 10.0; // range from -5.0 to 5.0
+        const loopSpan = 10.0;
         this.loopTime = -5.0 + ((this.time * timeSpeed) % loopSpan);
 
-        // Encode state into object's position (fetched in shaders via lightPositionsWorld[0]):
+        // Calculate elevation above horizon (0.0 at horizon ±90°, 1.0 at zenith 0°)
+        const elevation = Math.cos(xRad);
+
+        // Encode state into object's position (read in shaders via lightPositionsWorld[0]):
         // x: 0.0 = Day, 1.0 = Night
         // y: loopTime (-5.0 to 5.0)
-        // z: elevation parameter sin(angleRad)
+        // z: elevation parameter (0.0 to 1.0)
         const posX = isNight ? 1.0 : 0.0;
         const posY = this.loopTime;
-        const posZ = Math.sin(angleRad);
+        const posZ = elevation;
         this.object.setPositionLocal([posX, posY, posZ]);
 
         // Dynamically update attached Light component color & intensity
         if (this.lightComp) {
-            const elevation = Math.sin(angleRad); // 0 at horizon, 1 at zenith
             if (!isNight) {
-                // DAY CYCLE
-                if (elevation < 0.3) {
-                    // Sunset / Sunrise: warm red / coral / golden amber
-                    const t = elevation / 0.3;
+                // DAY LIGHT COLOR & INTENSITY
+                if (elevation < 0.25) {
+                    // Sunset / Sunrise: warm crimson / coral / golden amber
+                    const t = elevation / 0.25;
                     const r = 1.0;
-                    const g = 0.35 + 0.55 * t;
+                    const g = 0.35 + 0.57 * t;
                     const b = 0.15 + 0.65 * t;
                     this.lightComp.color = [r, g, b];
                     this.lightComp.intensity = 0.6 + 0.6 * t;
                 } else {
-                    // Noon / Bright Day: bright warm white / light blue sky light
-                    const t = (elevation - 0.3) / 0.7;
+                    // Noon / Bright Day: warm white daylight
+                    const t = (elevation - 0.25) / 0.75;
                     const r = 1.0 - 0.05 * t;
                     const g = 0.92 + 0.05 * t;
-                    const b = 0.8 + 0.18 * t;
+                    const b = 0.80 + 0.18 * t;
                     this.lightComp.color = [r, g, b];
                     this.lightComp.intensity = 1.2 + 0.3 * t;
                 }
             } else {
-                // NIGHT CYCLE: Midnight blueish moon color palette
-                const t = elevation;
-                const r = 0.12 + 0.08 * (1.0 - t);
-                const g = 0.22 + 0.18 * t;
-                const b = 0.60 + 0.35 * t;
-                this.lightComp.color = [r, g, b];
-                this.lightComp.intensity = 0.3 + 0.2 * t;
+                // NIGHT LIGHT COLOR & INTENSITY
+                if (elevation < 0.25) {
+                    // Moonrise / Moonset horizon: matches sunset coral transition smoothly
+                    const t = elevation / 0.25;
+                    const r = 1.0 - 0.85 * t;
+                    const g = 0.35 - 0.10 * t;
+                    const b = 0.15 + 0.55 * t;
+                    this.lightComp.color = [r, g, b];
+                    this.lightComp.intensity = 0.6 - 0.25 * t;
+                } else {
+                    // Midnight blueish moon color palette
+                    const t = (elevation - 0.25) / 0.75;
+                    const r = 0.15 - 0.03 * t;
+                    const g = 0.25 + 0.15 * t;
+                    const b = 0.70 + 0.25 * t;
+                    this.lightComp.color = [r, g, b];
+                    this.lightComp.intensity = 0.35 + 0.15 * t;
+                }
             }
         }
     }
