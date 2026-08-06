@@ -27,53 +27,6 @@
                 1.0
             ]
         },
-        "15": {
-            "name": "WallPlane",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "7",
-                        "material": "122"
-                    },
-                    "active": true
-                }
-            ],
-            "scaling": [
-                4.0,
-                2.0,
-                4.0
-            ],
-            "translation": [
-                0.0,
-                2.0,
-                0.0
-            ],
-            "parent": "138"
-        },
-        "133": {
-            "link": {
-                "name": "WonderlandLogo",
-                "file": "models\\WonderlandLogo.glb"
-            },
-            "translation": [
-                -3.8000011,
-                3.4,
-                0.0100001
-            ],
-            "rotation": [
-                0.707095,
-                0.0,
-                0.0,
-                0.7071182
-            ],
-            "scaling": [
-                1.5,
-                1.4999444,
-                1.4999444
-            ],
-            "parent": "138"
-        },
         "17": {
             "name": "NonVrCamera",
             "parent": "14",
@@ -82,7 +35,12 @@
                     "type": "view"
                 },
                 {
-                    "type": "mouse-look"
+                    "type": "orbital-camera",
+                    "orbital-camera": {
+                        "target": "118",
+                        "zoomSensitivity": 10.0,
+                        "minZoom": 1.0
+                    }
                 }
             ]
         },
@@ -122,7 +80,7 @@
                 {
                     "type": "light",
                     "light": {
-                        "intensity": 1.0,
+                        "intensity": 0.001,
                         "shadows": true,
                         "type": "sun",
                         "shadowRange": 50.0
@@ -138,15 +96,15 @@
                 }
             ],
             "translation": [
-                0.0,
+                1.0,
                 0.0,
                 2.682209014892578e-7
             ],
             "rotation": [
                 0.6830127,
-                -0.1830126,
-                0.1830126,
-                0.6830126
+                -0.1830127,
+                0.1830125,
+                0.6830127
             ],
             "parent": "121",
             "scaling": [
@@ -154,118 +112,6 @@
                 0.999983,
                 0.9999821
             ]
-        },
-        "91": {
-            "name": "Pillar",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "11",
-                        "material": "25"
-                    }
-                }
-            ],
-            "translation": [
-                0.0,
-                0.615,
-                0.0
-            ],
-            "scaling": [
-                0.432345,
-                0.625,
-                0.432345
-            ],
-            "parent": "135"
-        },
-        "84": {
-            "name": "Text",
-            "components": [
-                {
-                    "type": "text",
-                    "text": {
-                        "effect": "outline",
-                        "characterSpacing": 0.1,
-                        "justified": false,
-                        "text": "Default Physical"
-                    }
-                }
-            ],
-            "translation": [
-                0.0,
-                0.002,
-                0.0
-            ],
-            "rotation": [
-                -0.707103,
-                0.0,
-                0.0,
-                0.7071104
-            ],
-            "scaling": [
-                1.0,
-                0.9999709,
-                0.9999709
-            ],
-            "parent": "125"
-        },
-        "102": {
-            "link": {
-                "name": "WL_ShaderBall",
-                "file": "models\\WonderlandShaderBall.glb"
-            },
-            "translation": [
-                0.0,
-                1.25,
-                0.0
-            ],
-            "scaling": [
-                3.0,
-                3.0,
-                3.0
-            ],
-            "components": [
-                {
-                    "mesh": {
-                        "material": "22"
-                    }
-                },
-                {
-                    "mesh": {
-                        "material": "99"
-                    }
-                }
-            ],
-            "parent": "135"
-        },
-        "120": {
-            "link": {
-                "name": "WL_ShaderBall",
-                "file": "models\\WonderlandShaderBall.glb"
-            },
-            "translation": [
-                0.0,
-                1.25,
-                0.0
-            ],
-            "scaling": [
-                3.0,
-                3.0,
-                3.0
-            ],
-            "components": [
-                {
-                    "mesh": {
-                        "material": "111"
-                    }
-                },
-                {
-                    "mesh": {
-                        "material": "99"
-                    }
-                }
-            ],
-            "parent": "137"
         },
         "90": {
             "name": "FloorPlane",
@@ -297,40 +143,8 @@
             ],
             "parent": "121"
         },
-        "95": {
-            "name": "Stands",
-            "parent": "121",
-            "translation": [
-                0.0,
-                0.0,
-                -2.0
-            ]
-        },
         "121": {
             "name": "Environment"
-        },
-        "117": {
-            "name": "Stand",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "11",
-                        "material": "25"
-                    }
-                }
-            ],
-            "translation": [
-                0.0,
-                0.615,
-                0.0
-            ],
-            "scaling": [
-                0.432345,
-                0.625,
-                0.432345
-            ],
-            "parent": "136"
         },
         "118": {
             "link": {
@@ -338,14 +152,14 @@
                 "file": "models\\WonderlandShaderBall.glb"
             },
             "translation": [
-                0.0,
-                1.25,
-                0.0
+                3.9443287,
+                0.3168339,
+                -5.2040281
             ],
             "scaling": [
+                3.0000004,
                 3.0,
-                3.0,
-                3.0
+                3.0000004
             ],
             "components": [
                 {
@@ -359,141 +173,12 @@
                     }
                 }
             ],
-            "parent": "136"
-        },
-        "119": {
-            "name": "Pillar",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "11",
-                        "material": "25"
-                    }
-                }
-            ],
-            "translation": [
-                0.0,
-                0.615,
-                0.0
-            ],
-            "scaling": [
-                0.432345,
-                0.625,
-                0.432345
-            ],
-            "parent": "137"
-        },
-        "123": {
-            "name": "TextShadow",
-            "components": [
-                {
-                    "type": "text",
-                    "text": {
-                        "effect": "outline",
-                        "characterSpacing": 0.1,
-                        "justified": false,
-                        "text": "Default Physical",
-                        "material": "124"
-                    },
-                    "active": true
-                }
-            ],
-            "translation": [
-                -0.0050184,
-                3.725290298461914e-8,
-                -0.0035808
-            ],
+            "parent": null,
             "rotation": [
-                -0.7070986,
-                0.0,
-                0.0,
-                0.7071148
-            ],
-            "scaling": [
-                1.0,
-                0.9999564,
-                0.9999564
-            ],
-            "parent": "125"
-        },
-        "125": {
-            "name": "Text",
-            "translation": [
-                0.0,
-                0.0216946,
-                2.1346309
-            ],
-            "scaling": [
-                7.0,
-                6.9998669,
-                6.9998669
-            ],
-            "parent": "121",
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ]
-        },
-        "135": {
-            "name": "StandLeft",
-            "parent": "95",
-            "translation": [
-                -2.0,
-                0.0,
-                0.0
-            ]
-        },
-        "136": {
-            "name": "StandCenter",
-            "parent": "95"
-        },
-        "137": {
-            "name": "StandRight",
-            "parent": "95",
-            "translation": [
-                2.0,
-                0.0,
-                0.0
-            ]
-        },
-        "138": {
-            "name": "Wall",
-            "parent": "121",
-            "translation": [
-                0.0,
-                0.0,
-                -4.0
-            ]
-        },
-        "139": {
-            "name": "Mesh",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "9",
-                        "material": "131"
-                    }
-                }
-            ],
-            "translation": [
-                1.0,
-                2.2385535,
-                0.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "scaling": [
-                1.0,
-                1.0,
-                1.0
+                2.706752297854109e-7,
+                0.9996809,
+                -2.830409471243911e-7,
+                0.0252581
             ]
         }
     },
@@ -625,7 +310,7 @@
                     1.0,
                     1.0,
                     1.0,
-                    0.145098
+                    0.117647
                 ],
                 "flatTexture": "1"
             }
@@ -785,7 +470,13 @@
             "pipeline": "47",
             "Physical": {
                 "roughnessFactor": 0.3,
-                "metallicFactor": 0.3
+                "metallicFactor": 0.0,
+                "albedoColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ]
             }
         },
         "111": {
@@ -860,14 +551,14 @@
             },
             "pipeline": "47",
             "Physical": {
-                "metallicFactor": 1.0,
+                "metallicFactor": 0.3,
                 "albedoColor": [
-                    0.9607843,
-                    0.0,
-                    0.5568627,
+                    1.0,
+                    1.0,
+                    1.0,
                     1.0
                 ],
-                "roughnessFactor": 0.0
+                "roughnessFactor": 0.1
             }
         },
         "122": {
@@ -1320,7 +1011,8 @@
             "features": {
                 "TONEMAPPING": false
             },
-            "blending": true
+            "blending": true,
+            "castShadows": true
         },
         "144": {
             "link": {

@@ -5,6 +5,7 @@
  *
  * Features:
  * - Multi-octave Gerstner-style ocean wave & ripple simulation
+ * - Material property `distortionFactor` (1.0 = full waves, 0.0 = pure pristine mirror reflection)
  * - Subsurface light scattering through wave crests
  * - Dual-lobe specular reflections & dynamic sky reflections
  * - Dynamic crest foam
@@ -37,6 +38,7 @@
 
 struct Material {
     lowp vec4 color;
+    mediump float distortionFactor;
 #ifdef TEXTURED
     mediump uint flatTexture;
 #endif
@@ -115,9 +117,13 @@ void main() {
     vec2 texUV = fragPositionWorld.xz;
     #endif
 
-    // Multi-frequency wave calculation
+    // Material Distortion Factor (1.0 = full wave distortion, 0.0 = pure mirror reflection)
+    float distortion = clamp(mat.distortionFactor, 0.0, 1.0);
+
+    // Multi-frequency wave calculation mixed with flat mirror normal based on distortionFactor
     vec3 waveData = computeOceanWave(texUV * 1.5, animTime);
-    vec3 localNormal = normalize(vec3(-waveData.x, 1.0, -waveData.z));
+    vec3 waveNormal = normalize(vec3(-waveData.x, 1.0, -waveData.z));
+    vec3 localNormal = mix(vec3(0.0, 1.0, 0.0), waveNormal, distortion);
 
     vec3 worldNorm = length(fragNormal) > 0.001 ? normalize(fragNormal) : vec3(0.0, 1.0, 0.0);
     vec3 tangent = normalize(cross(worldNorm, vec3(0.0, 0.0, 1.0)));
@@ -136,7 +142,7 @@ void main() {
 
     // Subsurface Scattering (Light transmitting through wave crests facing light)
     float sunCos = clamp(dot(lightDir, vec3(0.0, 1.0, 0.0)), 0.0, 1.0);
-    float sss = pow(max(0.0, dot(viewDir, -lightDir + bumpNormal * 0.5)), 4.0) * bumpNormal.y * 0.6;
+    float sss = pow(max(0.0, dot(viewDir, -lightDir + bumpNormal * 0.5)), 4.0) * bumpNormal.y * 0.6 * distortion;
     vec3 sssColor = isNight < 0.5 ? mix(vec3(0.05, 0.55, 0.45), vec3(0.9, 0.4, 0.2), 1.0 - sunCos) : vec3(0.02, 0.25, 0.45);
 
     // Color Gradients based on Day/Sunset/Night
@@ -172,8 +178,8 @@ void main() {
     float specular = pow(NdotH, 256.0) * 4.5 + pow(NdotH, 24.0) * 0.7;
     vec3 specColor = specular * lightCol * (isNight < 0.5 ? 1.0 : 0.6);
 
-    // Wave Crest Foam
-    float foam = smoothstep(0.82, 1.35, waveData.y) * 0.45;
+    // Wave Crest Foam (scaled by distortion)
+    float foam = smoothstep(0.82, 1.35, waveData.y) * 0.45 * distortion;
 
     // Final Water Composition
     vec3 finalWater = mix(waterBaseColor, skyReflect, fresnel) + specColor + vec3(foam);

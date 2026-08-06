@@ -31,6 +31,7 @@
 
 struct Material {
     color: vec4<f16>,
+    distortionFactor: f32,
 #ifdef TEXTURED
     flatTexture: u32,
 #endif
@@ -113,8 +114,12 @@ fn main(
     let texUV = fragPositionWorld.xz;
 #endif
 
+    // Material Distortion Factor (1.0 = full wave distortion, 0.0 = pure mirror reflection)
+    let distortion = clamp(mat.distortionFactor, 0.0, 1.0);
+
     let waveData = computeOceanWave(texUV * 1.5, animTime);
-    let localNormal = normalize(vec3<f32>(-waveData.x, 1.0, -waveData.z));
+    let waveNormal = normalize(vec3<f32>(-waveData.x, 1.0, -waveData.z));
+    let localNormal = mix(vec3<f32>(0.0, 1.0, 0.0), waveNormal, distortion);
 
     let worldNorm = select(vec3<f32>(0.0, 1.0, 0.0), normalize(fragNormal), length(fragNormal) > 0.001);
     var tangent = normalize(cross(worldNorm, vec3<f32>(0.0, 0.0, 1.0)));
@@ -131,7 +136,7 @@ fn main(
     let fresnel = pow(1.0 - NdotV, 4.0) * 0.85 + 0.10;
 
     let sunCos = clamp(dot(lightDir, vec3<f32>(0.0, 1.0, 0.0)), 0.0, 1.0);
-    let sss = pow(max(0.0, dot(viewDir, -lightDir + bumpNormal * 0.5)), 4.0) * bumpNormal.y * 0.6;
+    let sss = pow(max(0.0, dot(viewDir, -lightDir + bumpNormal * 0.5)), 4.0) * bumpNormal.y * 0.6 * distortion;
     let sssColor = select(mix(vec3<f32>(0.05, 0.55, 0.45), vec3<f32>(0.9, 0.4, 0.2), 1.0 - sunCos), vec3<f32>(0.02, 0.25, 0.45), isNight >= 0.5);
 
     var deepWaterColor: vec3<f32>;
@@ -164,7 +169,7 @@ fn main(
     let specular = pow(NdotH, 256.0) * 4.5 + pow(NdotH, 24.0) * 0.7;
     let specColor = specular * lightCol * select(1.0, 0.6, isNight >= 0.5);
 
-    let foam = smoothstep(0.82, 1.35, waveData.y) * 0.45;
+    let foam = smoothstep(0.82, 1.35, waveData.y) * 0.45 * distortion;
     var finalWater = mix(waterBaseColor, skyReflect, fresnel) + specColor + vec3<f32>(foam);
 
     #ifdef TONEMAPPING
