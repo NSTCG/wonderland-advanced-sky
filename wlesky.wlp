@@ -185,7 +185,7 @@
                 -0.0000013
             ],
             "rotation": [
-                -0.7071065,
+                -0.7071064,
                 0.0,
                 0.0,
                 0.7071068
@@ -220,7 +220,7 @@
                 {
                     "type": "lod-terrain",
                     "lod-terrain": {
-                        "playerCamera": "18"
+                        "playerCamera": "17"
                     }
                 },
                 {
@@ -233,7 +233,7 @@
             ],
             "translation": [
                 0.0,
-                -0.8762165,
+                -0.8762164,
                 0.0
             ],
             "rotation": [
@@ -377,7 +377,7 @@
                     1.0,
                     1.0,
                     1.0,
-                    0.5019605
+                    0.9098039
                 ],
                 "flatTexture": null,
                 "distortionFactor": 0.2,
@@ -765,7 +765,8 @@
                     1.0
                 ],
                 "causticsIntensity": 1.0,
-                "fogDensity": 0.8999999
+                "fogDensity": 0.0099999,
+                "normalTexture": null
             }
         }
     },
@@ -1114,6 +1115,19 @@
             "blending": true,
             "castShadows": true
         },
+        "145": {
+            "link": {
+                "name": "Terrain",
+                "file": "default"
+            },
+            "features": {
+                "NORMAL_MAPPING": false,
+                "TONEMAPPING": true
+            },
+            "doubleSided": true,
+            "castShadows": true,
+            "depthTest": true
+        },
         "144": {
             "link": {
                 "name": "Water Textured",
@@ -1126,12 +1140,6 @@
             },
             "blending": true,
             "doubleSided": true
-        },
-        "145": {
-            "link": {
-                "name": "Terrain",
-                "file": "default"
-            }
         },
         "146": {
             "link": {

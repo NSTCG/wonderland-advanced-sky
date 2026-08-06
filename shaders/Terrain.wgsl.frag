@@ -1,5 +1,5 @@
 /**
- * Realistic Terrain & Underwater Caustics Shader (WGSL)
+ * Realistic Terrain & Underwater Depth Fog Shader (WGSL)
  */
 
 #define USE_LIGHTS
@@ -113,41 +113,52 @@ fn main(
 #endif
 #endif
 
+    let detailNoise = skyNoise2D(fragPositionWorld.xz * 0.25) * 0.5 + 0.5;
+    let microGrain = skyNoise2D(fragPositionWorld.xz * 3.0) * 0.2 + 0.8;
+
     let heightY = fragPositionWorld.y;
     let slope = 1.0 - bumpNormal.y;
 
-    let sandColor = vec3<f32>(0.76, 0.70, 0.50);
-    let grassColor = vec3<f32>(0.18, 0.42, 0.15);
-    let rockColor = vec3<f32>(0.35, 0.33, 0.32);
-    let snowColor = vec3<f32>(0.92, 0.95, 0.98);
-    let deepAbyssalColor = vec3<f32>(0.01, 0.05, 0.15);
+    let sandColor = vec3<f32>(0.76, 0.70, 0.50) * (0.85 + 0.3 * detailNoise) * microGrain;
+    let grassColor = vec3<f32>(0.18, 0.42, 0.15) * (0.8 + 0.4 * detailNoise) * microGrain;
+    let rockColor = vec3<f32>(0.35, 0.33, 0.32) * (0.75 + 0.5 * detailNoise) * microGrain;
+    let snowColor = vec3<f32>(0.92, 0.95, 0.98) * (0.9 + 0.2 * detailNoise);
 
     var terrainBaseColor: vec3<f32>;
+    var specularIntensity: f32 = 0.0;
+    var specularPower: f32 = 16.0;
 
     if (heightY < 0.0) {
-        let underwaterDepth = clamp(-heightY / 15.0, 0.0, 1.0);
+        let rawDepth = clamp(-heightY / 40.0, 0.0, 1.0);
+        let depthFactor = rawDepth * rawDepth * (3.0 - 2.0 * rawDepth);
+
         let shallowBed = mix(sandColor, rockColor, clamp(slope * 2.0, 0.0, 1.0));
-        terrainBaseColor = mix(shallowBed, deepAbyssalColor, underwaterDepth * 0.75);
+        let deepDarkBlue = select(vec3<f32>(0.01, 0.04, 0.12), vec3<f32>(0.001, 0.004, 0.015), isNight >= 0.5);
+        terrainBaseColor = mix(shallowBed, deepDarkBlue, depthFactor * 0.85);
 
         let cIntensity = select(1.0, mat.causticsIntensity, mat.causticsIntensity > 0.001);
         let cUV1 = fragPositionWorld.xz * 0.25 + vec2<f32>(animTime * 0.45, animTime * 0.30);
         let cUV2 = fragPositionWorld.xz * 0.35 - vec2<f32>(animTime * 0.35, animTime * 0.50);
-        let caustics = pow(skyNoise2D(cUV1) * skyNoise2D(cUV2), 1.6) * 3.5 * exp(-underwaterDepth * 2.5);
+        let caustics = pow(skyNoise2D(cUV1) * skyNoise2D(cUV2), 1.6) * 3.0 * (1.0 - depthFactor * 0.7);
 
         let causticColor = select(vec3<f32>(0.4, 0.85, 0.95), vec3<f32>(0.1, 0.3, 0.6), isNight >= 0.5);
         terrainBaseColor += caustics * causticColor * cIntensity * max(0.2, bumpNormal.y);
     } else {
-        if (heightY < 4.0) {
-            let t = heightY / 4.0;
+        if (heightY < 3.0) {
+            let t = heightY / 3.0;
             terrainBaseColor = mix(sandColor, grassColor, t);
+            specularIntensity = (1.0 - t) * 0.35;
+            specularPower = 48.0;
         } else if (heightY < 18.0) {
-            let t = (heightY - 4.0) / 14.0;
+            let t = (heightY - 3.0) / 15.0;
             terrainBaseColor = mix(grassColor, rockColor, t);
         } else {
             let t = clamp((heightY - 18.0) / 12.0, 0.0, 1.0);
             terrainBaseColor = mix(rockColor, snowColor, t);
+            specularIntensity = t * 0.2;
+            specularPower = 32.0;
         }
-        terrainBaseColor = mix(terrainBaseColor, rockColor, smoothstep(0.35, 0.70, slope));
+        terrainBaseColor = mix(terrainBaseColor, rockColor * 0.85, smoothstep(0.35, 0.70, slope));
     }
 
 #ifdef TEXTURED
@@ -157,19 +168,33 @@ fn main(
 #endif
     terrainBaseColor *= vec3<f32>(mat.color.rgb);
 
-    let NdotL = max(0.1, dot(bumpNormal, lightDir));
-    var finalTerrain = terrainBaseColor * lightCol * NdotL;
-
     let viewVec = viewPositionWorld - fragPositionWorld;
     let viewDist = length(viewVec);
     let viewDir = select(vec3<f32>(0.0, 1.0, 0.0), normalize(-viewVec), viewDist > 0.001);
 
-    let density = select(0.0012, mat.fogDensity, mat.fogDensity > 0.001);
-    var fogFactor = 1.0 - exp(-pow(viewDist * density, 1.5));
-    fogFactor = clamp(fogFactor, 0.0, 1.0);
+    let NdotL = max(0.12, dot(bumpNormal, lightDir));
+    var finalTerrain = terrainBaseColor * lightCol * NdotL;
 
-    let skyFogColor = evaluateAtmosphericSkyFast(viewDir, lightDir, lightCol, isNight, animTime);
-    finalTerrain = mix(finalTerrain, skyFogColor, fogFactor);
+    if (specularIntensity > 0.01) {
+        let halfVec = normalize(lightDir + viewDir);
+        let NdotH = max(0.0, dot(bumpNormal, halfVec));
+        let spec = pow(NdotH, specularPower) * specularIntensity;
+        finalTerrain += lightCol * spec;
+    }
+
+    if (heightY < 0.0 || viewPositionWorld.y < 0.0) {
+        let uFog = clamp(1.0 - exp(-viewDist * 0.008), 0.0, 0.95);
+        let deepDarkBlue = select(vec3<f32>(0.01, 0.04, 0.12), vec3<f32>(0.001, 0.004, 0.015), isNight >= 0.5);
+        finalTerrain = mix(finalTerrain, deepDarkBlue, uFog);
+    } else {
+        let fogDist = max(0.0, viewDist - 250.0);
+        let heightFactor = exp(-max(0.0, fragPositionWorld.y) * 0.02);
+        let density = select(0.0012, mat.fogDensity, mat.fogDensity > 0.001);
+        let atmFog = clamp(1.0 - exp(-pow(fogDist * density * heightFactor, 1.35)), 0.0, 1.0);
+
+        let skyColor = evaluateAtmosphericSkyFast(viewDir, lightDir, lightCol, isNight, animTime);
+        finalTerrain = mix(finalTerrain, skyColor, atmFog);
+    }
 
     #ifdef TONEMAPPING
     var linear = srgbToLinear3(finalTerrain);
