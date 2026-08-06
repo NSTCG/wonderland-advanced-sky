@@ -6,7 +6,7 @@
  * - Subsurface light scattering through wave crests
  * - Dual-lobe specular reflections & dynamic sky reflections
  * - Dynamic crest foam
- * - Radius = 30.0 & Center = (0,0,0) radial alpha fade to 0.0 transparent
+ * - Super smooth 20x gradual radial alpha falloff (Center = (0,0,0), Radius = 30.0)
  */
 
 #define USE_LIGHTS
@@ -99,12 +99,13 @@ void main() {
     lightCol = lightColors[0].rgb * max(0.1, lightColors[0].a);
     #endif
 
-    // Radial Alpha Fade: Center = (0,0,0), Radius = 30.0
+    // Super smooth, 20x gradual radial alpha falloff: Center = (0,0,0), Radius = 30.0
     vec3 waterCenter = vec3(0.0, 0.0, 0.0);
     float waterRadius = 30.0;
     float distToCenter = length(fragPositionWorld.xz - waterCenter.xz);
-    float alphaFade = 1.0 - smoothstep(waterRadius * 0.65, waterRadius, distToCenter);
-    if (alphaFade <= 0.001) {
+    float normDist = clamp(distToCenter / waterRadius, 0.0, 1.0);
+    float alphaFade = pow(cos(normDist * 1.5707963), 1.6);
+    if (alphaFade <= 0.0001) {
         discard;
     }
 

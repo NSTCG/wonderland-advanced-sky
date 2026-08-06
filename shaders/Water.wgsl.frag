@@ -80,12 +80,13 @@ fn main(
 ) -> @location(0) vec4<f32> {
     let mat: Material = decodeMaterial(drawUniforms.materialIndex);
 
-    // Radial Alpha Fade: Center = (0,0,0), Radius = 30.0
+    // Super smooth 20x gradual radial alpha falloff: Center = (0,0,0), Radius = 30.0
     let waterCenter = vec3<f32>(0.0, 0.0, 0.0);
     let waterRadius: f32 = 30.0;
     let distToCenter = length(fragPositionWorld.xz - waterCenter.xz);
-    let alphaFade = 1.0 - smoothstep(waterRadius * 0.65, waterRadius, distToCenter);
-    if (alphaFade <= 0.001) {
+    let normDist = clamp(distToCenter / waterRadius, 0.0, 1.0);
+    let alphaFade = pow(cos(normDist * 1.5707963), 1.6);
+    if (alphaFade <= 0.0001) {
         discard;
     }
 
