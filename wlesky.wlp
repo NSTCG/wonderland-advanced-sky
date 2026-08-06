@@ -1318,7 +1318,7 @@
                 "file": "default"
             },
             "features": {
-                "TONEMAPPING": true
+                "TONEMAPPING": false
             },
             "blending": true
         },

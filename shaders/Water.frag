@@ -25,6 +25,8 @@
 #include "lib/Inputs.glsl"
 #include "lib/Color.glsl"
 
+out lowp vec4 outColor;
+
 #ifdef TEXTURED
 #include "lib/Textures.glsl"
 #endif
